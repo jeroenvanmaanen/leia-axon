@@ -1,8 +1,8 @@
 swagger: "2.0"
 info:
-  description: "This is STACK server. [Swagger contract](resources/etc/swagger.yaml)."
+  description: "This is LEIA learns server. [Swagger contract](resources/etc/swagger.yaml)."
   version: 1.0.0
-  title: STACK
+  title: LEIA learns
   termsOfService: http://swagger.io/terms/
   contact:
     url: http://leialearns.org/contact/
@@ -20,7 +20,7 @@ paths:
   /api/prod/{name}:
     post:
       tags:
-      - STACK
+      - LeiaLearns
       description: Prod the greeter to provoke a response
       operationId: prod
       parameters:
@@ -38,12 +38,12 @@ paths:
           description: Invalid input
       security:
       - STACK_auth:
-        - write:STACK
-        - read:STACK
+        - write:LeiaLearns
+        - read:LeiaLearns
   /api/admin/unique-bucket/clean-existing-keys:
     post:
       tags:
-      - STACK
+      - LeiaLearns
       description: Move existing keys to their respective child buckets
       operationId: cleanExistingKeys
       responses:
@@ -52,7 +52,7 @@ paths:
   /api/admin/unique-bucket:
     get:
       tags:
-      - STACK
+      - LeiaLearns
       description: Describe all unique buckets
       operationId: describeUniqueBuckets
       responses:
@@ -82,8 +82,8 @@ securityDefinitions:
     authorizationUrl: /oauth/authorize
     flow: implicit
     scopes:
-      write:STACK: modify STACK in your account
-      read:STACK: read your STACK
+      write:LeiaLearns: modify Leia Learns in your account
+      read:LeiaLearns: read your Leia Learns
   api_key:
     type: apiKey
     name: api_key
