@@ -1,0 +1,90 @@
+swagger: "2.0"
+info:
+  description: "This is STACK server. [Swagger contract](resources/etc/swagger.yaml)."
+  version: 1.0.0
+  title: STACK
+  termsOfService: http://swagger.io/terms/
+  contact:
+    url: http://leialearns.org/contact/
+  license:
+    name: LGPLv3
+    url: https://www.gnu.org/licenses/lgpl-3.0.en.html
+## host: localhost
+basePath: /api/greeter
+schemes:
+- http
+consumes: []
+produces:
+- application/json
+paths:
+  /api/prod/{name}:
+    post:
+      tags:
+      - STACK
+      description: Prod the greeter to provoke a response
+      operationId: prod
+      parameters:
+      - in: path
+        name: name
+        description: The name of the person to greet
+        required: true
+        type: string
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            type: string
+        405:
+          description: Invalid input
+      security:
+      - STACK_auth:
+        - write:STACK
+        - read:STACK
+  /api/admin/unique-bucket/clean-existing-keys:
+    post:
+      tags:
+      - STACK
+      description: Move existing keys to their respective child buckets
+      operationId: cleanExistingKeys
+      responses:
+        200:
+          description: Successful operation
+  /api/admin/unique-bucket:
+    get:
+      tags:
+      - STACK
+      description: Describe all unique buckets
+      operationId: describeUniqueBuckets
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            $ref: "#/definitions/ArrayOfUniqueBucket"
+definitions:
+  UniqueBucket:
+    type: object
+    properties:
+      id:
+        type: string
+      fullKeyPrefix:
+        type: string
+      keyPrefix:
+        type: string
+      parentId:
+        type: string
+  ArrayOfUniqueBucket:
+    type: array
+    items:
+      $ref: "#/definitions/UniqueBucket"
+securityDefinitions:
+  STACK_auth:
+    type: oauth2
+    authorizationUrl: /oauth/authorize
+    flow: implicit
+    scopes:
+      write:STACK: modify STACK in your account
+      read:STACK: read your STACK
+  api_key:
+    type: apiKey
+    name: api_key
+    in: header

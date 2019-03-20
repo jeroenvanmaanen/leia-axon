@@ -1,0 +1,22 @@
+events {
+}
+
+http {
+    include             mime-types.nginx;
+    index               index.html;
+    default_type        text/html;
+    server {
+        listen          80;
+        root            /usr/share/nginx/html;
+        location        ~ ^/api/ {
+            proxy_pass  http://STACK-core:8080;
+        }
+        location        ~ ^/ {
+            proxy_pass  http://STACK-present:3000;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "upgrade";
+            proxy_set_header Host $host;
+        }
+    }
+}
