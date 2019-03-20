@@ -1,4 +1,4 @@
-/STACK/docker-compose.yml
+/leia/docker-compose.yml
 /.idea/
 /tmp/
 /**/*-local.*

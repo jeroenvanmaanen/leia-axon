@@ -1,13 +1,13 @@
 package org.leialearns.axon;
 
-public interface StackCommand {
-    String getId();
+public interface StackCommand extends StackCommandUnsafe {
 
     default StackCommand send(StackCommandGateway commandGateway) {
-        commandGateway.send(this);
+        commandGateway.unsafeSend(this);
         return this;
     }
+
     default String sendAndWait(StackCommandGateway commandGateway) {
-        return commandGateway.sendAndWait(this);
+        return commandGateway.unsafeSendAndWait(this);
     }
 }

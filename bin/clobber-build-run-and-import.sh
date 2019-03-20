@@ -82,14 +82,14 @@ sleep 5 # Wait for Axon Server to start
 
     if "${DO_BUILD}"
     then
-        docker rm -f "${STACK}-server" || true
+        docker rm -f "${STACK}-axon-server" || true
         docker rm -f "${STACK}-mongodb" || true
         "${BIN}/docker-run-axon-server.sh"
         "${BIN}/docker-run-mongodb.sh"
 
         ./mvnw -Djansi.force=true clean package
 
-        docker stop "${STACK}-server"
+        docker stop "${STACK}-axon-server"
         docker stop "${STACK}-mongodb"
     fi
 
@@ -103,19 +103,15 @@ sleep 5 # Wait for Axon Server to start
     PID_STACK="$!"
     trap "echo ; kill '${PID_STACK}' ; waitForDockerComposeReady" EXIT
 
-    cd data
     AXON_SERVER_URL="http://localhost:${AXON_SERVER_PORT}"
     waitForServerReady "${AXON_SERVER_URL}/actuator/health"
     STACK_API_URL="http://localhost:${API_SERVER_PORT}"
     waitForServerReady "${STACK_API_URL}/actuator/health"
     sleep 5
 
-    echo 'Importing accounts' >&2
-    curl -sS -X POST "${STACK_API_URL}/api/account/upload" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@accounts-local.yaml"
-    echo 'Importing entries' >&2
-    curl -sS -X POST "${STACK_API_URL}/api/entry/upload/TDF" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@transactions-local.tsv"
-    echo 'Importing compound samples' >&2
-    curl -sS -X POST "${STACK_API_URL}/api/compound/upload" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@compound-local.yaml"
+    : cd data
+    echo 'Importing domains' >&2
+    echo '[...TODO...]'
     echo 'Imported all' >&2
 
     wait "${PID_STACK}"

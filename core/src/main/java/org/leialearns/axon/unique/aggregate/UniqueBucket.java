@@ -76,12 +76,13 @@ public class UniqueBucket {
             String childKey = hash.substring(0, childKeyPrefixLength);
             String remainderKey = hash.substring(childKeyPrefixLength);
             String childId = getChildId(childKey, commandGateway);
-            return commandGateway.sendAndWait(AddUniqueKeyCommand.builder()
+            return AddUniqueKeyCommand.builder()
                 .id(childId)
                 .domain(domain)
                 .key(key)
                 .hash(remainderKey)
-                .build());
+                .build()
+                .sendAndWait(commandGateway);
         }
     }
 
@@ -105,12 +106,13 @@ public class UniqueBucket {
         } else {
             String childId = UUID.randomUUID().toString();
             String fullChildPrefix = fullPrefix == null ? null : fullPrefix + childKey;
-            commandGateway.sendAndWait(CreateUniqueBucketCommand.builder()
+            CreateUniqueBucketCommand.builder()
                 .id(childId)
                 .fullPrefix(fullPrefix)
                 .maxKeys(maxKeys)
                 .childKeyPrefixLength(childKeyPrefixLength)
-                .build());
+                .build()
+                .sendAndWait(commandGateway);
             children.put(childKey, childId);
             Collection<UniqueKeyRemovedEvent> removedEvents = new ArrayList<>();
             Iterator<Map.Entry<Pair<Object,String>,String>> it = existingKeys.entrySet().iterator();
@@ -127,7 +129,13 @@ public class UniqueBucket {
             for (UniqueKeyRemovedEvent uniqueKeyRemovedEvent : removedEvents) {
                 apply(uniqueKeyRemovedEvent);
             }
-            apply(UniqueBucketChildAddedEvent.builder().parentId(id).childId(childId).fullPrefix(fullChildPrefix).keyPrefix(childKey).build());
+            UniqueBucketChildAddedEvent.builder()
+                .parentId(id)
+                .childId(childId)
+                .fullPrefix(fullChildPrefix)
+                .keyPrefix(childKey)
+                .build()
+                .apply();
             return childId;
         }
     }
@@ -137,12 +145,13 @@ public class UniqueBucket {
         Collection<UniqueKeyRemovedEvent> removedEvents, StackCommandGateway commandGateway
     ) {
         log.info("Transfer key to child: {}: {}: {}", key, childKey, childId);
-        commandGateway.sendAndWait(AddUniqueKeyCommand.builder()
+        AddUniqueKeyCommand.builder()
             .id(childId)
             .domain(domain)
             .key(key)
             .hash(hash.substring(childKey.length()))
-            .build());
+            .build()
+            .sendAndWait(commandGateway);
         removedEvents.add(UniqueKeyRemovedEvent.builder()
             .bucketId(id)
             .domain(domain)
@@ -162,7 +171,11 @@ public class UniqueBucket {
             for (Map.Entry<String,String> entry : children.entrySet()) {
                 String fullChildPrefix = fullPrefix + entry.getKey();
                 String childId = entry.getValue();
-                commandGateway.sendAndWait(CleanExistingKeysCommand.builder().id(childId).fullPrefix(fullChildPrefix).build());
+                CleanExistingKeysCommand.builder()
+                    .id(childId)
+                    .fullPrefix(fullChildPrefix)
+                    .build()
+                    .sendAndWait(commandGateway);
             }
         } else if (!fullPrefix.equals(commandFullPrefix)) {
             log.error("Cannot change full prefix of existing unique bucket: {}: {}", commandFullPrefix, fullPrefix);

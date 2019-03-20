@@ -47,12 +47,13 @@ public class UniqueKeyService {
             log.warn("Exception while getting bucket for hash: {}", hash, e);
             bucketId = UNIQUE_ROOT_ID;
         }
-        String result = commandGateway.sendAndWait(AddUniqueKeyCommand.builder()
+        String result = AddUniqueKeyCommand.builder()
             .id(bucketId)
             .domain(domain)
             .key(key)
             .hash(hash)
-            .build());
+            .build()
+            .sendAndWait(commandGateway);
         if (StringUtils.isEmpty(result)) {
             log.debug("Key already exists: {}: {}", domain, key);
             throw new IllegalStateException("Key already exists: " + domain + ": " + key);
@@ -71,17 +72,21 @@ public class UniqueKeyService {
         } else {
             try {
                 log.info("Initializing: {}", UNIQUE_ROOT_ID);
-                commandGateway.sendAndWait(CreateUniqueBucketCommand.builder()
-                    .id(UNIQUE_ROOT_ID).maxKeys(100).childKeyPrefixLength(2).build());
+                CreateUniqueBucketCommand.builder()
+                    .id(UNIQUE_ROOT_ID)
+                    .maxKeys(100)
+                    .childKeyPrefixLength(2)
+                    .build()
+                    .sendAndWait(commandGateway);
             } catch (Exception ignore) {
                 log.info("Unique bucket root already exists");
             }
         }
-        commandGateway.sendAndWait(UniqueBucketLogStatisticsCommand.builder().id(UNIQUE_ROOT_ID).build());
+        UniqueBucketLogStatisticsCommand.builder().id(UNIQUE_ROOT_ID).build().sendAndWait(commandGateway);
     }
 
     public void cleanUniqueKeys() {
-        commandGateway.sendAndWait(CleanExistingKeysCommand.builder().id(UNIQUE_ROOT_ID).fullPrefix("").build());
+        CleanExistingKeysCommand.builder().id(UNIQUE_ROOT_ID).fullPrefix("").build().sendAndWait(commandGateway);
     }
 
     public Collection<UniqueBucket> describeUniqueBuckets() {

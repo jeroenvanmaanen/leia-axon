@@ -17,6 +17,43 @@ consumes: []
 produces:
 - application/json
 paths:
+  /api/domain/{key}:
+    post:
+      tags:
+      - LeiaLearns
+      description: Create a Domain for symbols
+      operationId: createDomain
+      parameters:
+      - in: path
+        name: key
+        description: The key of the new Domain
+        required: true
+        type: string
+      responses:
+        200:
+          description: Successful operation
+  /api/domain/{key}/{symbol}:
+    post:
+      tags:
+      - LeiaLearns
+      description: Get or create a Symbol in the given Domain
+      operationId: getOrCreateSymbol
+      parameters:
+      - in: path
+        name: key
+        description: The key of an existing Domain
+        required: true
+        type: string
+      - in: path
+        name: key
+        description: The name of the new Symbol
+        required: true
+        type: string
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            $ref: "#/definitions/Symbol"
   /api/prod/{name}:
     post:
       tags:
@@ -61,6 +98,15 @@ paths:
           schema:
             $ref: "#/definitions/ArrayOfUniqueBucket"
 definitions:
+  Symbol:
+    type: object
+    properties:
+      name:
+        type: string
+      ordinal:
+        type: integer
+      descriptionLength:
+        type: integer
   UniqueBucket:
     type: object
     properties:

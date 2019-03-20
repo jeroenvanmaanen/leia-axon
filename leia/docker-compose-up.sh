@@ -23,7 +23,11 @@ source "${PROJECT}/bin/settings-local.sh"
 : ${EXTRA_VOLUMES:=}
 source "${COMPOSE}/etc/settings-local.sh"
 
-DOCKER_REPOSITORY="${STACK}"
+DOCKER_REPOSITORY="${DOCKER_REPOSITORY:=}"
+if [[ -z "${DOCKER_REPOSITORY}" ]]
+then
+    DOCKER_REPOSITORY="${STACK}"
+fi
 
 VOLUMES=''
 if [[ -n "${EXTRA_VOLUMES}" ]]

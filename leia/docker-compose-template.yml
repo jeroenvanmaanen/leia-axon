@@ -43,11 +43,6 @@ services:
     depends_on:
     - mongodb
     - axon-server
-    deploy:
-      mode: replicated
-      replicas: 2
-      restart_policy:
-        condition: on-failure
   ${STACK}-present:
     image: ${DOCKER_REPOSITORY}/${STACK}-present:${STACK_IMAGE_VERSION}${PRESENT_SUFFIX}
     networks:

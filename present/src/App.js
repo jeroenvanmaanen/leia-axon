@@ -4,12 +4,9 @@ import './App.css';
 class App extends Component {
 
   render() {
-    console.log('UUID', UUID);
-    const uuid = UUID.create();
-    console.log('uuid', uuid);
     return (
       <div className="App">
-        <!-- TODO: Add greeter -->
+        <div style='display:none'>TODO: Add greeter</div>
       </div>
     );
   }
