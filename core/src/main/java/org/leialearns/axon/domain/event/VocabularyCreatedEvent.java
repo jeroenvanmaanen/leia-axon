@@ -7,8 +7,8 @@ import org.leialearns.axon.StackEvent;
 
 @Value
 @Builder
-@JsonDeserialize(builder = DomainCreatedEvent.DomainCreatedEventBuilder.class)
-public class DomainCreatedEvent implements StackEvent {
+@JsonDeserialize(builder = VocabularyCreatedEvent.VocabularyCreatedEventBuilder.class)
+public class VocabularyCreatedEvent implements StackEvent {
     String id;
     String key;
 }

@@ -7,7 +7,7 @@ import org.leialearns.axon.StackCommand;
 
 @Value
 @Builder
-public class CreateDomainCommandUnsafe implements StackCommand {
+public class CreateVocabularyCommand implements StackCommand {
 
     @TargetAggregateIdentifier
     private String id;

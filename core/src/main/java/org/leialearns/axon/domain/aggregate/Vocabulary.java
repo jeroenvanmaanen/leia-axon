@@ -7,11 +7,11 @@ import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.AggregateIdentifier;
 import org.axonframework.spring.stereotype.Aggregate;
-import org.leialearns.axon.domain.command.CreateDomainCommandUnsafe;
+import org.leialearns.axon.domain.command.CreateVocabularyCommandUnsafe;
 import org.leialearns.axon.domain.command.DeclareClosedCommand;
 import org.leialearns.axon.domain.command.DeclareOpenCommand;
 import org.leialearns.axon.domain.event.ClosedEvent;
-import org.leialearns.axon.domain.event.DomainCreatedEvent;
+import org.leialearns.axon.domain.event.VocabularyCreatedEvent;
 import org.leialearns.axon.domain.event.RemainsOpenEvent;
 import org.leialearns.axon.model.node.command.GetOrCreateSymbolCommand;
 import org.leialearns.axon.domain.event.SymbolCreatedEvent;
@@ -28,7 +28,7 @@ import static java.lang.String.format;
 @Getter
 @NoArgsConstructor
 @Slf4j
-public class Domain {
+public class Vocabulary {
 
     @AggregateIdentifier
     private String id;
@@ -41,13 +41,13 @@ public class Domain {
     private Integer uniformDescriptionLength;
 
     @CommandHandler
-    public Domain(CreateDomainCommandUnsafe command) {
+    public Vocabulary(CreateVocabularyCommandUnsafe command) {
         id = command.getId();
-        DomainCreatedEvent.builder().id(id).key(command.getKey()).build().apply();
+        VocabularyCreatedEvent.builder().id(id).key(command.getKey()).build().apply();
     }
 
     @EventSourcingHandler
-    public void on(DomainCreatedEvent event) {
+    public void on(VocabularyCreatedEvent event) {
         id = event.getId();
         key = event.getKey();
     }

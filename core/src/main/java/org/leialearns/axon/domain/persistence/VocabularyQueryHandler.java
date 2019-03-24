@@ -2,7 +2,7 @@ package org.leialearns.axon.domain.persistence;
 
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.queryhandling.QueryHandler;
-import org.leialearns.axon.domain.query.DomainByKeyQuery;
+import org.leialearns.axon.domain.query.VocabularyByKeyQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -13,19 +13,19 @@ import java.util.Optional;
 
 @Component
 @Slf4j
-public class DomainQueryHandler {
+public class VocabularyQueryHandler {
 
     private final MongoTemplate mongoTemplate;
 
     @Autowired
-    public DomainQueryHandler(MongoTemplate mongoTemplate) {
+    public VocabularyQueryHandler(MongoTemplate mongoTemplate) {
         this.mongoTemplate = mongoTemplate;
     }
 
     @QueryHandler
-    public String handle(DomainByKeyQuery query) {
+    public String handle(VocabularyByKeyQuery query) {
         Query mongoQuery = Query.query(Criteria.where("key").is(query.getKey()));
-        DomainDocument domainDocument = mongoTemplate.findOne(mongoQuery, DomainDocument.class);
-        return Optional.ofNullable(domainDocument).map(DomainDocument::getId).orElse(null);
+        VocabularyDocument vocabularyDocument = mongoTemplate.findOne(mongoQuery, VocabularyDocument.class);
+        return Optional.ofNullable(vocabularyDocument).map(VocabularyDocument::getId).orElse(null);
     }
 }

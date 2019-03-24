@@ -5,10 +5,10 @@ import lombok.Value;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "domain")
+@Document(collection = "vocabulary")
 @Value
 @Builder
-public class DomainDocument {
+public class VocabularyDocument {
 
     @Id
     String id;

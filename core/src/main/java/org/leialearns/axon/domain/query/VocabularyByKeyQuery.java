@@ -5,6 +5,6 @@ import lombok.Value;
 
 @Value
 @Builder
-public class DomainByKeyQuery {
+public class VocabularyByKeyQuery {
     String key;
 }

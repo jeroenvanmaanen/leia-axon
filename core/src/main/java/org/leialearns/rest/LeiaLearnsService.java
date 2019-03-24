@@ -3,8 +3,8 @@ package org.leialearns.rest;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.queryhandling.QueryGateway;
 import org.leialearns.axon.StackCommandGateway;
-import org.leialearns.axon.domain.command.CreateDomainCommand;
-import org.leialearns.axon.domain.query.DomainByKeyQuery;
+import org.leialearns.axon.domain.command.CreateVocabularyCommand;
+import org.leialearns.axon.domain.query.VocabularyByKeyQuery;
 import org.leialearns.axon.model.node.command.GetOrCreateSymbolCommand;
 import org.leialearns.model.Symbol;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +36,7 @@ public class LeiaLearnsService implements LeiaLearnsApiDelegate {
 
     @Override
     public ResponseEntity<Void> createDomain(String key) {
-        String id = CreateDomainCommand.builder()
+        String id = CreateVocabularyCommand.builder()
             .id(UUID.randomUUID().toString())
             .key(key)
             .build()
@@ -48,7 +48,7 @@ public class LeiaLearnsService implements LeiaLearnsApiDelegate {
     @Override
     public ResponseEntity<Symbol> getOrCreateSymbol(String key, String symbolName) {
         try {
-            String domainId = queryGateway.query(DomainByKeyQuery.builder().key(key).build(), String.class).get();
+            String domainId = queryGateway.query(VocabularyByKeyQuery.builder().key(key).build(), String.class).get();
             Symbol symbol = commandGateway.getOrCreateSymbol(GetOrCreateSymbolCommand.builder()
                 .id(domainId)
                 .name(symbolName)
