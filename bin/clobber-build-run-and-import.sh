@@ -110,7 +110,7 @@ sleep 5 # Wait for Axon Server to start
     sleep 5
 
     : cd data
-    echo 'Importing domains' >&2
+    echo 'Importing vocabularies' >&2
     echo '[...TODO...]'
     echo 'Imported all' >&2
 
