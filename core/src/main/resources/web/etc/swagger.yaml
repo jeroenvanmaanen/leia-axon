@@ -17,31 +17,31 @@ consumes: []
 produces:
 - application/json
 paths:
-  /api/domain/{key}:
+  /api/vocabulary/{key}:
     post:
       tags:
       - LeiaLearns
-      description: Create a Domain for symbols
-      operationId: createDomain
+      description: Create a Vocabulary for symbols
+      operationId: createVocabulary
       parameters:
       - in: path
         name: key
-        description: The key of the new Domain
+        description: The key of the new Vocabulary
         required: true
         type: string
       responses:
         200:
           description: Successful operation
-  /api/domain/{key}/{symbol}:
+  /api/vocabulary/{key}/{symbol}:
     post:
       tags:
       - LeiaLearns
-      description: Get or create a Symbol in the given Domain
+      description: Get or create a Symbol in the given Vocabulary
       operationId: getOrCreateSymbol
       parameters:
       - in: path
         name: key
-        description: The key of an existing Domain
+        description: The key of an existing Vocabulary
         required: true
         type: string
       - in: path

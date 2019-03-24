@@ -27,11 +27,11 @@ public class VocabularyCommandHandler {
     public String handle(CreateVocabularyCommand command) {
         String id = command.getId();
         String key = command.getKey();
-        log.trace("Create domain: {}: unique key service: {}", key, uniqueKeyService);
+        log.trace("Create vocabulary: {}: unique key service: {}", key, uniqueKeyService);
         try {
             uniqueKeyService.assertUnique(Vocabulary.class.toString(), key);
         } catch (IllegalStateException exception) {
-            log.warn("Domain not created; key already exists: {}: {}: {}", key, exception, String.valueOf(exception.getCause()));
+            log.warn("Vocabulary not created; key already exists: {}: {}: {}", key, exception, String.valueOf(exception.getCause()));
             return null;
         }
         return CreateVocabularyCommandUnsafe.builder().id(id).key(key).build().sendAndWait(commandGateway);

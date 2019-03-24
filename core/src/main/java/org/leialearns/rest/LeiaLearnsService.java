@@ -35,22 +35,22 @@ public class LeiaLearnsService implements LeiaLearnsApiDelegate {
     }
 
     @Override
-    public ResponseEntity<Void> createDomain(String key) {
+    public ResponseEntity<Void> createVocabulary(String key) {
         String id = CreateVocabularyCommand.builder()
             .id(UUID.randomUUID().toString())
             .key(key)
             .build()
             .sendAndWait(commandGateway);
-        log.info("Created Domain: {}: {}", key, id);
+        log.info("Created Vocabulary: {}: {}", key, id);
         return ResponseEntity.ok(null);
     }
 
     @Override
     public ResponseEntity<Symbol> getOrCreateSymbol(String key, String symbolName) {
         try {
-            String domainId = queryGateway.query(VocabularyByKeyQuery.builder().key(key).build(), String.class).get();
+            String vocabularyId = queryGateway.query(VocabularyByKeyQuery.builder().key(key).build(), String.class).get();
             Symbol symbol = commandGateway.getOrCreateSymbol(GetOrCreateSymbolCommand.builder()
-                .id(domainId)
+                .id(vocabularyId)
                 .name(symbolName)
                 .build());
             return ResponseEntity.ok(symbol);

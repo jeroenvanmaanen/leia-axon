@@ -57,7 +57,7 @@ public class Vocabulary {
         String name = command.getName();
         return symbols.computeIfAbsent(command.getName(), n -> {
             if (!open) {
-                throw new IllegalStateException(format("Domain is closed, no new symbols can be added: %s: %s", id, name));
+                throw new IllegalStateException(format("Vocabulary is closed, no new symbols can be added: %s: %s", id, name));
             }
             Symbol symbol = new Symbol();
             symbol.setName(name);
@@ -80,9 +80,9 @@ public class Vocabulary {
         if (!decided) {
             ClosedEvent.builder().build().apply();
         } else if (!open) {
-            log.warn("Domain was already closed: {}", id);
+            log.warn("Vocabulary was already closed: {}", id);
         } else {
-            throw new IllegalStateException(format("Domain was declared to remain open: %s", id));
+            throw new IllegalStateException(format("Vocabulary was declared to remain open: %s", id));
         }
     }
 
@@ -99,9 +99,9 @@ public class Vocabulary {
         if (!decided) {
             RemainsOpenEvent.builder().build().apply();
         } else if (open) {
-            log.warn("Domain was already declared to remain open: {}", id);
+            log.warn("Vocabulary was already declared to remain open: {}", id);
         } else {
-            throw new IllegalStateException(format("Domain was closed: %s", id));
+            throw new IllegalStateException(format("Vocabulary was closed: %s", id));
         }
     }
 
