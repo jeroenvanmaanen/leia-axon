@@ -45,7 +45,7 @@ paths:
         required: true
         type: string
       - in: path
-        name: key
+        name: symbol
         description: The name of the new Symbol
         required: true
         type: string

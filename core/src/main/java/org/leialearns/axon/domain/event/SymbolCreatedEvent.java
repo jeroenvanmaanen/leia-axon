@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.Builder;
 import lombok.Value;
 import org.leialearns.axon.StackEvent;
-import org.leialearns.axon.domain.aggregate.Symbol;
+import org.leialearns.model.Symbol;
 
 @Value
 @Builder

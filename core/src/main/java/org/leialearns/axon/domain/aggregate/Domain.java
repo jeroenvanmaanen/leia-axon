@@ -15,6 +15,7 @@ import org.leialearns.axon.domain.event.DomainCreatedEvent;
 import org.leialearns.axon.domain.event.RemainsOpenEvent;
 import org.leialearns.axon.model.node.command.GetOrCreateSymbolCommand;
 import org.leialearns.axon.domain.event.SymbolCreatedEvent;
+import org.leialearns.model.Symbol;
 
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -58,8 +59,10 @@ public class Domain {
             if (!open) {
                 throw new IllegalStateException(format("Domain is closed, no new symbols can be added: %s: %s", id, name));
             }
-            Symbol symbol = Symbol.builder().name(name).ordinal(lastOrdinal.incrementAndGet()).build();
-            symbol = withDescriptionLength(symbol);
+            Symbol symbol = new Symbol();
+            symbol.setName(name);
+            symbol.setOrdinal(lastOrdinal.incrementAndGet());
+            setDescriptionLength(symbol);
             SymbolCreatedEvent.builder().symbol(symbol).build().apply();
             return symbol;
         });
@@ -110,13 +113,13 @@ public class Domain {
     }
 
     private void fixDescriptionLengths() {
-        symbols.keySet().forEach(symbol -> symbols.put(symbol, withDescriptionLength(symbols.get(symbol))));
+        symbols.keySet().forEach(symbol -> symbols.put(symbol, setDescriptionLength(symbols.get(symbol))));
     }
 
-    private Symbol withDescriptionLength(Symbol symbol) {
+    private Symbol setDescriptionLength(Symbol symbol) {
         if (decided) {
             int descriptionLength = open ? descriptionLength(symbol.getOrdinal()) : uniformDescriptionLength;
-            return symbol.withDescriptionLength(descriptionLength);
+            symbol.setDescriptionLength(descriptionLength);
         }
         return symbol;
     }

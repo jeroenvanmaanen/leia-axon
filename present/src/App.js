@@ -4,9 +4,10 @@ import './App.css';
 class App extends Component {
 
   render() {
+    const hide = {"display":"none"}
     return (
       <div className="App">
-        <div style='display:none'>TODO: Add greeter</div>
+        <div style={hide}>TODO: Add greeter</div>
       </div>
     );
   }
