@@ -10,6 +10,5 @@ import org.leialearns.model.Symbol;
 @Builder
 @JsonDeserialize(builder = SymbolDescriptionLengthFixedEvent.SymbolDescriptionLengthFixedEventBuilder.class)
 public class SymbolDescriptionLengthFixedEvent implements StackEvent {
-    private String vocabulary;
     private Symbol symbol;
 }

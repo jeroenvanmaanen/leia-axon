@@ -37,21 +37,23 @@ public class VocabularyEventHandler {
 
     @EventHandler
     public void on(SymbolCreatedEvent event) {
-        String vocabulary = event.getVocabulary();
         Symbol symbol = event.getSymbol();
+        String vocabulary = symbol.getVocabulary();
         Integer ordinal = symbol.getOrdinal();
-        Query query = Query.query(Criteria.where("vocabulary").is(vocabulary).and("symbol.ordinal").is(ordinal));
-        Update update = Update.update("vocabulary", vocabulary).set("symbol", symbol).set("_class", SymbolDocument.class.getCanonicalName());
+        log.debug("Update or insert symbol: {}: {}", vocabulary, ordinal);
+        Query query = Query.query(Criteria.where("symbol.vocabulary").is(vocabulary).and("symbol.ordinal").is(ordinal));
+        Update update = Update.update("symbol", symbol).set("_class", SymbolDocument.class.getCanonicalName());
         mongoTemplate.upsert(query, update, SymbolDocument.class);
     }
 
     @EventHandler
     public void on(SymbolDescriptionLengthFixedEvent event) {
-        String vocabulary = event.getVocabulary();
         Symbol symbol = event.getSymbol();
+        String vocabulary = symbol.getVocabulary();
         Integer ordinal = symbol.getOrdinal();
-        Query query = Query.query(Criteria.where("vocabulary").is(vocabulary).and("symbol.ordinal").is(ordinal));
-        Update update = Update.update("vocabulary", vocabulary).set("symbol", symbol).set("_class", SymbolDocument.class.getCanonicalName());
+        log.debug("Update or insert symbol: {}: {}: {}", vocabulary, ordinal, symbol.getDescriptionLength());
+        Query query = Query.query(Criteria.where("symbol.vocabulary").is(vocabulary).and("symbol.ordinal").is(ordinal));
+        Update update = Update.update("symbol", symbol).set("_class", SymbolDocument.class.getCanonicalName());
         mongoTemplate.upsert(query, update, SymbolDocument.class);
     }
 }

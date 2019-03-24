@@ -58,10 +58,11 @@ public class Vocabulary {
                 throw new IllegalStateException(format("Vocabulary is closed, no new symbols can be added: %s: %s", id, name));
             }
             Symbol symbol = new Symbol();
+            symbol.setVocabulary(key);
             symbol.setName(name);
             symbol.setOrdinal(lastOrdinal.incrementAndGet());
             setDescriptionLength(symbol);
-            SymbolCreatedEvent.builder().vocabulary(key).symbol(symbol).build().apply();
+            SymbolCreatedEvent.builder().symbol(symbol).build().apply();
             return symbol;
         });
     }
@@ -125,7 +126,7 @@ public class Vocabulary {
 
     private SymbolDescriptionLengthFixedEvent[] fixDescriptionLengths() {
         return symbols.values().stream()
-            .map(symbol -> SymbolDescriptionLengthFixedEvent.builder().vocabulary(key).symbol(setDescriptionLength(symbol)).build())
+            .map(symbol -> SymbolDescriptionLengthFixedEvent.builder().symbol(setDescriptionLength(symbol)).build())
             .toArray(SymbolDescriptionLengthFixedEvent[]::new);
     }
 

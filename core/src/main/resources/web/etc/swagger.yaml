@@ -138,6 +138,8 @@ definitions:
   Symbol:
     type: object
     properties:
+      vocabulary:
+        type: string
       name:
         type: string
       ordinal:

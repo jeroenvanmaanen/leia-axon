@@ -41,7 +41,7 @@ public class VocabularyQueryHandler {
 
     @QueryHandler
     public Symbol[] handle(VocabularyGetSymbolsByKeyQuery query) {
-        Query dbQuery = Query.query(Criteria.where("vocabulary").is(query.getKey()));
+        Query dbQuery = Query.query(Criteria.where("symbol.vocabulary").is(query.getKey()));
         return mongoTemplate.find(dbQuery, SymbolDocument.class).stream().map(SymbolDocument::getSymbol).toArray(Symbol[]::new);
     }
 }
