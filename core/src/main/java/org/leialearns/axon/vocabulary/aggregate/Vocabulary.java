@@ -7,14 +7,12 @@ import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.AggregateIdentifier;
 import org.axonframework.spring.stereotype.Aggregate;
+import org.leialearns.axon.StackEvent;
 import org.leialearns.axon.vocabulary.command.CreateVocabularyCommandUnsafe;
 import org.leialearns.axon.vocabulary.command.DeclareClosedCommand;
 import org.leialearns.axon.vocabulary.command.DeclareOpenCommand;
-import org.leialearns.axon.vocabulary.event.ClosedEvent;
-import org.leialearns.axon.vocabulary.event.VocabularyCreatedEvent;
-import org.leialearns.axon.vocabulary.event.RemainsOpenEvent;
+import org.leialearns.axon.vocabulary.event.*;
 import org.leialearns.axon.model.node.command.GetOrCreateSymbolCommand;
-import org.leialearns.axon.vocabulary.event.SymbolCreatedEvent;
 import org.leialearns.model.Symbol;
 
 import java.math.BigInteger;
@@ -63,7 +61,7 @@ public class Vocabulary {
             symbol.setName(name);
             symbol.setOrdinal(lastOrdinal.incrementAndGet());
             setDescriptionLength(symbol);
-            SymbolCreatedEvent.builder().symbol(symbol).build().apply();
+            SymbolCreatedEvent.builder().vocabulary(key).symbol(symbol).build().apply();
             return symbol;
         });
     }
@@ -78,6 +76,10 @@ public class Vocabulary {
     @CommandHandler
     public void handle(DeclareClosedCommand command) {
         if (!decided) {
+            open = false;
+            for (StackEvent event : fixDescriptionLengths()) {
+                event.apply();
+            }
             ClosedEvent.builder().build().apply();
         } else if (!open) {
             log.warn("Vocabulary was already closed: {}", id);
@@ -97,6 +99,9 @@ public class Vocabulary {
     @CommandHandler
     public void handle(DeclareOpenCommand command) {
         if (!decided) {
+            for (StackEvent event : fixDescriptionLengths()) {
+                event.apply();
+            }
             RemainsOpenEvent.builder().build().apply();
         } else if (open) {
             log.warn("Vocabulary was already declared to remain open: {}", id);
@@ -112,8 +117,16 @@ public class Vocabulary {
         fixDescriptionLengths();
     }
 
-    private void fixDescriptionLengths() {
-        symbols.keySet().forEach(symbol -> symbols.put(symbol, setDescriptionLength(symbols.get(symbol))));
+    @EventSourcingHandler
+    public void on(SymbolDescriptionLengthFixedEvent event) {
+        Symbol symbol = event.getSymbol();
+        symbols.put(event.getSymbol().getName(), symbol);
+    }
+
+    private SymbolDescriptionLengthFixedEvent[] fixDescriptionLengths() {
+        return symbols.values().stream()
+            .map(symbol -> SymbolDescriptionLengthFixedEvent.builder().vocabulary(key).symbol(setDescriptionLength(symbol)).build())
+            .toArray(SymbolDescriptionLengthFixedEvent[]::new);
     }
 
     private Symbol setDescriptionLength(Symbol symbol) {

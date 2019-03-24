@@ -32,7 +32,20 @@ paths:
       responses:
         200:
           description: Successful operation
-  /api/vocabulary/{key}/{symbol}:
+  /api/vocabulary:
+    get:
+      tags:
+      - LeiaLearns
+      description: Get the keys of all known vocabularies
+      operationId: getVocabularyKeys
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            $ref: "#/definitions/ArrayOfString"
+      produces:
+      - application/json
+  /api/vocabulary/{key}/symbol/{symbol}:
     post:
       tags:
       - LeiaLearns
@@ -54,29 +67,53 @@ paths:
           description: Successful operation
           schema:
             $ref: "#/definitions/Symbol"
-  /api/prod/{name}:
-    post:
+  /api/vocabulary/{key}/symbol:
+    get:
       tags:
       - LeiaLearns
-      description: Prod the greeter to provoke a response
-      operationId: prod
+      description: Get all symbols in a vocabulary
+      operationId: getSymbols
       parameters:
       - in: path
-        name: name
-        description: The name of the person to greet
+        name: key
+        description: The key of an existing Vocabulary
         required: true
         type: string
       responses:
         200:
           description: Successful operation
           schema:
-            type: string
-        405:
-          description: Invalid input
-      security:
-      - STACK_auth:
-        - write:LeiaLearns
-        - read:LeiaLearns
+            $ref: "#/definitions/ArrayOfSymbol"
+  /api/vocabulary/{key}/close:
+    post:
+      tags:
+      - LeiaLearns
+      description: Declare this vocabulary closed, no more symbols will be added, description lengths will be determined accordingly
+      operationId: closeVocabulary
+      parameters:
+      - in: path
+        name: key
+        description: The key of an existing Vocabulary
+        required: true
+        type: string
+      responses:
+        200:
+          description: Successful operation
+  /api/vocabulary/{key}/remain-open:
+    post:
+      tags:
+      - LeiaLearns
+      description: Declare that this vocabulary remains open, more symbols can be added later, description lengths will be determined accordingly
+      operationId: declareVocabularyOpen
+      parameters:
+        - in: path
+          name: key
+          description: The key of an existing Vocabulary
+          required: true
+          type: string
+      responses:
+        200:
+          description: Successful operation
   /api/admin/unique-bucket/clean-existing-keys:
     post:
       tags:
@@ -107,6 +144,10 @@ definitions:
         type: integer
       descriptionLength:
         type: integer
+  ArrayOfSymbol:
+    type: array
+    items:
+      $ref: "#/definitions/Symbol"
   UniqueBucket:
     type: object
     properties:
@@ -122,6 +163,10 @@ definitions:
     type: array
     items:
       $ref: "#/definitions/UniqueBucket"
+  ArrayOfString:
+    type: array
+    items:
+      type: string
 securityDefinitions:
   STACK_auth:
     type: oauth2

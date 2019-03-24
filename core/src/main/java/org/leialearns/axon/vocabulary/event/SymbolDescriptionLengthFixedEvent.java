@@ -8,8 +8,8 @@ import org.leialearns.model.Symbol;
 
 @Value
 @Builder
-@JsonDeserialize(builder = SymbolCreatedEvent.SymbolCreatedEventBuilder.class)
-public class SymbolCreatedEvent implements StackEvent {
+@JsonDeserialize(builder = SymbolDescriptionLengthFixedEvent.SymbolDescriptionLengthFixedEventBuilder.class)
+public class SymbolDescriptionLengthFixedEvent implements StackEvent {
     private String vocabulary;
     private Symbol symbol;
 }
