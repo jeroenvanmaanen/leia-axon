@@ -1,4 +1,4 @@
-package org.leialearns.axon.domain.event;
+package org.leialearns.axon.vocabulary.event;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.Builder;

@@ -1,4 +1,4 @@
-package org.leialearns.axon.domain.query;
+package org.leialearns.axon.vocabulary.query;
 
 import lombok.Builder;
 import lombok.Value;

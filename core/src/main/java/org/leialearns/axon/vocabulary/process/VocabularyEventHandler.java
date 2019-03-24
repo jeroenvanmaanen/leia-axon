@@ -1,9 +1,9 @@
-package org.leialearns.axon.domain.process;
+package org.leialearns.axon.vocabulary.process;
 
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.eventhandling.EventHandler;
-import org.leialearns.axon.domain.event.VocabularyCreatedEvent;
-import org.leialearns.axon.domain.persistence.VocabularyDocument;
+import org.leialearns.axon.vocabulary.event.VocabularyCreatedEvent;
+import org.leialearns.axon.vocabulary.persistence.VocabularyDocument;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;

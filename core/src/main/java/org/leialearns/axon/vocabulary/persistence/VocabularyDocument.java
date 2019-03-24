@@ -1,4 +1,4 @@
-package org.leialearns.axon.domain.persistence;
+package org.leialearns.axon.vocabulary.persistence;
 
 import lombok.Builder;
 import lombok.Value;

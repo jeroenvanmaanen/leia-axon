@@ -1,8 +1,8 @@
-package org.leialearns.axon.domain.persistence;
+package org.leialearns.axon.vocabulary.persistence;
 
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.queryhandling.QueryHandler;
-import org.leialearns.axon.domain.query.VocabularyByKeyQuery;
+import org.leialearns.axon.vocabulary.query.VocabularyByKeyQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;

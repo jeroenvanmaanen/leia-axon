@@ -1,4 +1,4 @@
-package org.leialearns.axon.domain.aggregate;
+package org.leialearns.axon.vocabulary.aggregate;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -7,14 +7,14 @@ import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.AggregateIdentifier;
 import org.axonframework.spring.stereotype.Aggregate;
-import org.leialearns.axon.domain.command.CreateVocabularyCommandUnsafe;
-import org.leialearns.axon.domain.command.DeclareClosedCommand;
-import org.leialearns.axon.domain.command.DeclareOpenCommand;
-import org.leialearns.axon.domain.event.ClosedEvent;
-import org.leialearns.axon.domain.event.VocabularyCreatedEvent;
-import org.leialearns.axon.domain.event.RemainsOpenEvent;
+import org.leialearns.axon.vocabulary.command.CreateVocabularyCommandUnsafe;
+import org.leialearns.axon.vocabulary.command.DeclareClosedCommand;
+import org.leialearns.axon.vocabulary.command.DeclareOpenCommand;
+import org.leialearns.axon.vocabulary.event.ClosedEvent;
+import org.leialearns.axon.vocabulary.event.VocabularyCreatedEvent;
+import org.leialearns.axon.vocabulary.event.RemainsOpenEvent;
 import org.leialearns.axon.model.node.command.GetOrCreateSymbolCommand;
-import org.leialearns.axon.domain.event.SymbolCreatedEvent;
+import org.leialearns.axon.vocabulary.event.SymbolCreatedEvent;
 import org.leialearns.model.Symbol;
 
 import java.math.BigInteger;

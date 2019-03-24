@@ -1,4 +1,4 @@
-package org.leialearns.axon.domain.command;
+package org.leialearns.axon.vocabulary.command;
 
 import lombok.Builder;
 import lombok.Value;
@@ -7,8 +7,10 @@ import org.leialearns.axon.StackCommand;
 
 @Value
 @Builder
-public class DeclareOpenCommand implements StackCommand {
+public class CreateVocabularyCommandUnsafe implements StackCommand {
 
     @TargetAggregateIdentifier
     private String id;
+
+    private String key;
 }

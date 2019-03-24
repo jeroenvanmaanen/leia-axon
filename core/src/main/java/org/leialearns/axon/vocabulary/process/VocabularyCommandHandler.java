@@ -1,11 +1,11 @@
-package org.leialearns.axon.domain.process;
+package org.leialearns.axon.vocabulary.process;
 
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.commandhandling.CommandHandler;
 import org.leialearns.axon.StackCommandGateway;
-import org.leialearns.axon.domain.aggregate.Vocabulary;
-import org.leialearns.axon.domain.command.CreateVocabularyCommand;
-import org.leialearns.axon.domain.command.CreateVocabularyCommandUnsafe;
+import org.leialearns.axon.vocabulary.aggregate.Vocabulary;
+import org.leialearns.axon.vocabulary.command.CreateVocabularyCommand;
+import org.leialearns.axon.vocabulary.command.CreateVocabularyCommandUnsafe;
 import org.leialearns.axon.unique.process.UniqueKeyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
