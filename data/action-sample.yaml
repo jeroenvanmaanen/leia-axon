@@ -1,0 +1,19 @@
+%YAML 1.2
+---
+type: CREATE_VOCABULARY
+symbol:
+  vocabulary: action
+---
+type: ADD_SYMBOL
+symbol:
+  vocabulary: action
+  name: left
+---
+type: ADD_SYMBOL
+symbol:
+  vocabulary: action
+  name: right
+---
+type: CLOSE_VOCABULARY
+symbol:
+  vocabulary: action

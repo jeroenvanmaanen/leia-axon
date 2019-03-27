@@ -1,0 +1,49 @@
+%YAML 1.2
+---
+type: CREATE_VOCABULARY
+symbol:
+  vocabulary: response
+---
+type: ADD_SYMBOL
+symbol:
+  vocabulary: response
+  name: black
+---
+type: ADD_SYMBOL
+symbol:
+  vocabulary: response
+  name: white
+---
+type: DECLARE_VOCABULARY_OPEN
+symbol:
+  vocabulary: response
+---
+type: ADD_SYMBOL
+symbol:
+  vocabulary: response
+  name: red
+---
+type: ADD_SYMBOL
+symbol:
+  vocabulary: response
+  name: green
+---
+type: ADD_SYMBOL
+symbol:
+  vocabulary: response
+  name: blue
+---
+type: ADD_SYMBOL
+symbol:
+  vocabulary: response
+  name: cyan
+---
+type: ADD_SYMBOL
+symbol:
+  vocabulary: response
+  name: magenta
+---
+type: ADD_SYMBOL
+symbol:
+  vocabulary: response
+  name: yellow

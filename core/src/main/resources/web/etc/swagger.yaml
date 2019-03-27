@@ -106,11 +106,27 @@ paths:
       description: Declare that this vocabulary remains open, more symbols can be added later, description lengths will be determined accordingly
       operationId: declareVocabularyOpen
       parameters:
-        - in: path
-          name: key
-          description: The key of an existing Vocabulary
-          required: true
-          type: string
+      - in: path
+        name: key
+        description: The key of an existing Vocabulary
+        required: true
+        type: string
+      responses:
+        200:
+          description: Successful operation
+  /api/vocabulary-upload:
+    post:
+      tags:
+      - LeiaLearns
+      description: Upload vocabulary
+      operationId: uploadVocabulary
+      consumes:
+      - multipart/form-data
+      parameters:
+      - in: formData
+        name: data
+        description: The data to upload
+        type: file
       responses:
         200:
           description: Successful operation

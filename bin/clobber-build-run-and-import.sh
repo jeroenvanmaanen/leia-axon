@@ -109,9 +109,10 @@ sleep 5 # Wait for Axon Server to start
     waitForServerReady "${STACK_API_URL}/actuator/health"
     sleep 5
 
-    : cd data
+    cd data
     echo 'Importing vocabularies' >&2
-    echo '[...TODO...]'
+    curl -sS -X POST "${STACK_API_URL}/api/vocabulary-upload" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@action-local.yaml"
+    curl -sS -X POST "${STACK_API_URL}/api/vocabulary-upload" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@response-local.yaml"
     echo 'Imported all' >&2
 
     wait "${PID_STACK}"
