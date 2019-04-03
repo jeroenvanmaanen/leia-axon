@@ -39,7 +39,7 @@ public class VocabularyEventHandler {
     public void on(SymbolCreatedEvent event) {
         Symbol symbol = event.getSymbol();
         String vocabulary = symbol.getVocabulary();
-        Integer ordinal = symbol.getOrdinal();
+        Long ordinal = symbol.getOrdinal();
         log.debug("Update or insert symbol: {}: {}", vocabulary, ordinal);
         Query query = Query.query(Criteria.where("symbol.vocabulary").is(vocabulary).and("symbol.ordinal").is(ordinal));
         Update update = Update.update("symbol", symbol).set("_class", SymbolDocument.class.getCanonicalName());
@@ -50,7 +50,7 @@ public class VocabularyEventHandler {
     public void on(SymbolDescriptionLengthFixedEvent event) {
         Symbol symbol = event.getSymbol();
         String vocabulary = symbol.getVocabulary();
-        Integer ordinal = symbol.getOrdinal();
+        Long ordinal = symbol.getOrdinal();
         log.debug("Update or insert symbol: {}: {}: {}", vocabulary, ordinal, symbol.getDescriptionLength());
         Query query = Query.query(Criteria.where("symbol.vocabulary").is(vocabulary).and("symbol.ordinal").is(ordinal));
         Update update = Update.update("symbol", symbol).set("_class", SymbolDocument.class.getCanonicalName());

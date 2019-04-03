@@ -18,7 +18,7 @@ import org.leialearns.model.Symbol;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static java.lang.String.format;
 
@@ -33,7 +33,7 @@ public class Vocabulary {
 
     private String key;
     private Map<String,Symbol> symbols = new HashMap<>();
-    private AtomicInteger lastOrdinal = new AtomicInteger(0);
+    private AtomicLong lastOrdinal = new AtomicLong(0);
     private boolean open = true;
     private boolean decided = false;
     private Integer uniformDescriptionLength;
@@ -138,7 +138,7 @@ public class Vocabulary {
         return symbol;
     }
 
-    private int descriptionLength(int ordinal) {
+    private int descriptionLength(long ordinal) {
         return (2 * BigInteger.valueOf(ordinal).bitLength()) + 1;
     }
 }

@@ -8,11 +8,10 @@ import org.leialearns.model.ModelNodeData;
 
 @Value
 @Builder
-public class CreateModelNodeCommand implements StackCommand {
+public class CreateModelNodeCommandUnsafe implements StackCommand {
 
     @TargetAggregateIdentifier
     private String id;
 
-    private ModelNodeData data;
-    private Boolean isSilent;
+    ModelNodeData data;
 }

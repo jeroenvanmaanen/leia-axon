@@ -17,10 +17,58 @@ consumes: []
 produces:
 - application/json
 paths:
+  /api/state/step/action:
+    post:
+      tags:
+      - StateTracker
+      description: Record an action step
+      operationId: recordActionStep
+      parameters:
+        - in: formData
+          name: currentState
+          description: The key of the model node that represents the current state
+          type: string
+        - in: formData
+          name: vocabulary
+          description: The key of the vocabulary
+          type: string
+        - in: formData
+          name: symbol
+          description: The name of the action symbol
+          type: string
+      responses:
+        200:
+          description: Action recorded
+          schema:
+            type: string
+  /api/state/step/perception:
+    post:
+      tags:
+        - StateTracker
+      description: Record an perception step
+      operationId: recordPerceptionStep
+      parameters:
+        - in: formData
+          name: currentState
+          description: The key of the model node that represents the current state
+          type: string
+        - in: formData
+          name: vocabulary
+          description: The key of the vocabulary
+          type: string
+        - in: formData
+          name: symbol
+          description: The name of the perception symbol
+          type: string
+      responses:
+        200:
+          description: Perception recorded
+          schema:
+            type: string
   /api/vocabulary/{key}:
     post:
       tags:
-      - LeiaLearns
+      - Vocabulary
       description: Create a Vocabulary for symbols
       operationId: createVocabulary
       parameters:
@@ -35,7 +83,7 @@ paths:
   /api/vocabulary:
     get:
       tags:
-      - LeiaLearns
+      - Vocabulary
       description: Get the keys of all known vocabularies
       operationId: getVocabularyKeys
       responses:
@@ -48,7 +96,7 @@ paths:
   /api/vocabulary/{key}/symbol/{symbol}:
     post:
       tags:
-      - LeiaLearns
+      - Vocabulary
       description: Get or create a Symbol in the given Vocabulary
       operationId: getOrCreateSymbol
       parameters:
@@ -70,7 +118,7 @@ paths:
   /api/vocabulary/{key}/symbol:
     get:
       tags:
-      - LeiaLearns
+      - Vocabulary
       description: Get all symbols in a vocabulary
       operationId: getSymbols
       parameters:
@@ -87,7 +135,7 @@ paths:
   /api/vocabulary/{key}/close:
     post:
       tags:
-      - LeiaLearns
+      - Vocabulary
       description: Declare this vocabulary closed, no more symbols will be added, description lengths will be determined accordingly
       operationId: closeVocabulary
       parameters:
@@ -102,7 +150,7 @@ paths:
   /api/vocabulary/{key}/remain-open:
     post:
       tags:
-      - LeiaLearns
+      - Vocabulary
       description: Declare that this vocabulary remains open, more symbols can be added later, description lengths will be determined accordingly
       operationId: declareVocabularyOpen
       parameters:
@@ -117,7 +165,7 @@ paths:
   /api/vocabulary-upload:
     post:
       tags:
-      - LeiaLearns
+      - Vocabulary
       description: Upload vocabulary
       operationId: uploadVocabulary
       consumes:
@@ -133,7 +181,7 @@ paths:
   /api/admin/unique-bucket/clean-existing-keys:
     post:
       tags:
-      - LeiaLearns
+      - UniqueKeys
       description: Move existing keys to their respective child buckets
       operationId: cleanExistingKeys
       responses:
@@ -142,7 +190,7 @@ paths:
   /api/admin/unique-bucket:
     get:
       tags:
-      - LeiaLearns
+      - UniqueKeys
       description: Describe all unique buckets
       operationId: describeUniqueBuckets
       responses:
@@ -151,6 +199,20 @@ paths:
           schema:
             $ref: "#/definitions/ArrayOfUniqueBucket"
 definitions:
+  ModelNodeData:
+    type: object
+    properties:
+      path:
+        description: Symbol IDs most recent first
+        type: array
+        items:
+          $ref: "#/definitions/SymbolReference"
+      key:
+        description: Unique readable representation
+        type: string
+      extensible:
+        description: Flag to indicate whether child nodes for this node may be created
+        type: boolean
   Symbol:
     type: object
     properties:
@@ -160,12 +222,21 @@ definitions:
         type: string
       ordinal:
         type: integer
+        format: int64
       descriptionLength:
         type: integer
   ArrayOfSymbol:
     type: array
     items:
       $ref: "#/definitions/Symbol"
+  SymbolReference:
+    type: object
+    properties:
+      vocabulary:
+        type: string
+      ordinal:
+        type: integer
+        format: int64
   UniqueBucket:
     type: object
     properties:

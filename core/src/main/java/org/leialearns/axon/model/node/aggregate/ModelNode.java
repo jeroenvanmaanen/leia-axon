@@ -7,7 +7,7 @@ import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.AggregateIdentifier;
 import org.axonframework.spring.stereotype.Aggregate;
-import org.leialearns.axon.model.node.command.CreateModelNodeCommand;
+import org.leialearns.axon.model.node.command.CreateModelNodeCommandUnsafe;
 import org.leialearns.axon.model.node.event.ModelNodeCreatedEvent;
 import org.leialearns.axon.once.CascadingCommandTracker;
 import org.leialearns.axon.once.CommandCounter;
@@ -25,9 +25,9 @@ public class ModelNode implements CascadingCommandTracker {
     private CommandCounter commandCounter;
 
     @CommandHandler
-    public ModelNode(CreateModelNodeCommand command) {
+    public ModelNode(CreateModelNodeCommandUnsafe command) {
         id = command.getId();
-        ModelNodeCreatedEvent.builder().id(id).build().apply();
+        ModelNodeCreatedEvent.builder().id(id).data(command.getData()).build().apply();
     }
 
     @EventSourcingHandler

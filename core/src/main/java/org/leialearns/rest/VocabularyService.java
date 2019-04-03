@@ -32,17 +32,19 @@ import java.util.UUID;
 
 @Component
 @Slf4j
-public class LeiaLearnsService implements LeiaLearnsApiDelegate {
+public class VocabularyService implements VocabularyApiDelegate {
 
     private StackCommandGateway commandGateway;
     private final QueryGateway queryGateway;
+    private final QueryService queryService;
     private final ObjectMapper yamlObjectMapper;
 
     @Autowired
-    public LeiaLearnsService(StackCommandGateway commandGateway, QueryGateway queryGateway,
+    public VocabularyService(StackCommandGateway commandGateway, QueryGateway queryGateway, QueryService queryService,
                              @Qualifier("yamlObjectMapper") ObjectMapper yamlObjectMapper) {
         this.commandGateway = commandGateway;
         this.queryGateway = queryGateway;
+        this.queryService = queryService;
         this.yamlObjectMapper = yamlObjectMapper;
         log.info("YAML object mapper: {}", yamlObjectMapper);
     }
@@ -78,11 +80,7 @@ public class LeiaLearnsService implements LeiaLearnsApiDelegate {
     @Override
     public ResponseEntity<Symbol> getOrCreateSymbol(String key, String symbolName) {
         try {
-            String vocabularyId = getVocabularyId(key);
-            Symbol symbol = commandGateway.getOrCreateSymbol(GetOrCreateSymbolCommand.builder()
-                .id(vocabularyId)
-                .name(symbolName)
-                .build());
+            Symbol symbol = getOrCreateSymbolInternal(key, symbolName);
             return ResponseEntity.ok(symbol);
         } catch (Exception e) {
             log.error("Internal server error", e);
@@ -90,24 +88,17 @@ public class LeiaLearnsService implements LeiaLearnsApiDelegate {
         }
     }
 
+    public Symbol getOrCreateSymbolInternal(String key, String symbolName) {
+        String vocabularyId = getVocabularyId(key);
+        return commandGateway.getOrCreateSymbol(GetOrCreateSymbolCommand.builder()
+            .id(vocabularyId)
+            .name(symbolName)
+            .build());
+    }
+
     private String getVocabularyId(String key) {
-        int sleep = 10;
-        int wait = 0;
-        do {
-            try {
-                String vocabularyId = queryGateway.query(VocabularyByKeyQuery.builder().key(key).build(), String.class).get();
-                if (vocabularyId != null) {
-                    return vocabularyId;
-                }
-                Thread.sleep(sleep);
-            } catch (Exception e) {
-                log.warn("Exception while getting vocabulary ID: {}", key, e);
-            }
-            sleep = sleep * 3 / 2;
-            wait += sleep;
-        } while (wait < 2000);
-        log.debug("Could not find vocabulary for key: {}", key);
-        return null;
+        Object query = VocabularyByKeyQuery.builder().key(key).build();
+        return queryService.queryWithRetry("Get vocabulary ID", query, String.class);
     }
 
     @Override
