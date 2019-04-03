@@ -7,7 +7,7 @@ import org.leialearns.axon.StackEvent;
 
 @Value
 @Builder
-@JsonDeserialize(builder = NodeCreatedEvent.NodeCreatedEventBuilder.class)
-public class NodeCreatedEvent implements StackEvent {
+@JsonDeserialize(builder = ModelNodeCreatedEvent.ModelNodeCreatedEventBuilder.class)
+public class ModelNodeCreatedEvent implements StackEvent {
     private String id;
 }

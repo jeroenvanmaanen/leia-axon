@@ -7,7 +7,7 @@ import org.leialearns.axon.StackCommand;
 
 @Value
 @Builder
-public class CreateNodeCommand implements StackCommand {
+public class CreateModelNodeCommand implements StackCommand {
 
     @TargetAggregateIdentifier
     private String id;

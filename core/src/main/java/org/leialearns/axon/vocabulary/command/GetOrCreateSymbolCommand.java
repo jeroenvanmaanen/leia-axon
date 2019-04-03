@@ -1,4 +1,4 @@
-package org.leialearns.axon.model.node.command;
+package org.leialearns.axon.vocabulary.command;
 
 import lombok.Builder;
 import lombok.Value;

@@ -12,7 +12,7 @@ import org.leialearns.axon.vocabulary.command.CreateVocabularyCommandUnsafe;
 import org.leialearns.axon.vocabulary.command.DeclareClosedCommand;
 import org.leialearns.axon.vocabulary.command.DeclareOpenCommand;
 import org.leialearns.axon.vocabulary.event.*;
-import org.leialearns.axon.model.node.command.GetOrCreateSymbolCommand;
+import org.leialearns.axon.vocabulary.command.GetOrCreateSymbolCommand;
 import org.leialearns.model.Symbol;
 
 import java.math.BigInteger;
