@@ -17,54 +17,69 @@ consumes: []
 produces:
 - application/json
 paths:
-  /api/state/step/action:
+  /api/model/observed/step/action:
     post:
       tags:
       - StateTracker
       description: Record an action step
       operationId: recordActionStep
       parameters:
-        - in: formData
-          name: currentState
-          description: The key of the model node that represents the current state
-          type: string
-        - in: formData
-          name: vocabulary
-          description: The key of the vocabulary
-          type: string
-        - in: formData
-          name: symbol
-          description: The name of the action symbol
-          type: string
+      - in: formData
+        name: currentState
+        description: The key of the model node that represents the current state
+        type: string
+      - in: formData
+        name: vocabulary
+        description: The key of the vocabulary
+        type: string
+      - in: formData
+        name: symbol
+        description: The name of the action symbol
+        type: string
       responses:
         200:
           description: Action recorded
           schema:
             type: string
-  /api/state/step/perception:
+  /api/model/observed/step/perception:
     post:
       tags:
-        - StateTracker
+      - StateTracker
       description: Record an perception step
       operationId: recordPerceptionStep
       parameters:
-        - in: formData
-          name: currentState
-          description: The key of the model node that represents the current state
-          type: string
-        - in: formData
-          name: vocabulary
-          description: The key of the vocabulary
-          type: string
-        - in: formData
-          name: symbol
-          description: The name of the perception symbol
-          type: string
+      - in: formData
+        name: currentState
+        description: The key of the model node that represents the current state
+        type: string
+      - in: formData
+        name: vocabulary
+        description: The key of the vocabulary
+        type: string
+      - in: formData
+        name: symbol
+        description: The name of the perception symbol
+        type: string
       responses:
         200:
           description: Perception recorded
           schema:
             type: string
+  /api/model/structure/node/{modelNodeId}/mark-extensible:
+    post:
+      tags:
+      - ModelStructure
+      description: Mark a Model Node as extensible
+      operationId: markExtensible
+      parameters:
+      - in: path
+        name: modelNodeId
+        description: The ID of the Model Node
+        required: true
+        type: string
+      responses:
+        200:
+          description: Successful operation
   /api/vocabulary/{key}:
     post:
       tags:

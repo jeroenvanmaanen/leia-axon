@@ -8,7 +8,9 @@ import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.AggregateIdentifier;
 import org.axonframework.spring.stereotype.Aggregate;
 import org.leialearns.axon.model.node.command.CreateModelNodeCommandUnsafe;
+import org.leialearns.axon.model.node.command.ModelNodeSetExtensibleCommand;
 import org.leialearns.axon.model.node.event.ModelNodeCreatedEvent;
+import org.leialearns.axon.model.node.event.ModelNodeWasMarkedAsExtensibleEvent;
 import org.leialearns.axon.once.CascadingCommandTracker;
 import org.leialearns.axon.once.CommandCounter;
 import org.leialearns.axon.once.TriggerCommandOnceService;
@@ -23,6 +25,7 @@ public class ModelNode implements CascadingCommandTracker {
     private String id;
 
     private CommandCounter commandCounter;
+    private boolean extensible = false;
 
     @CommandHandler
     public ModelNode(CreateModelNodeCommandUnsafe command) {
@@ -36,5 +39,23 @@ public class ModelNode implements CascadingCommandTracker {
             commandCounter = onceService.createCounter();
         }
         id = event.getId();
+        extensible = event.getData().isExtensible();
+    }
+
+    @CommandHandler
+    public void handle(ModelNodeSetExtensibleCommand command) {
+        if (extensible) {
+            return;
+        }
+        extensible = true;
+        ModelNodeWasMarkedAsExtensibleEvent.builder()
+            .id(id)
+            .build()
+            .apply();
+    }
+
+    @EventSourcingHandler
+    public void on(ModelNodeWasMarkedAsExtensibleEvent event) {
+        extensible = true;
     }
 }

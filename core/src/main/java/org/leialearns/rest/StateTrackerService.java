@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.axonframework.queryhandling.QueryGateway;
 import org.bson.types.ObjectId;
 import org.leialearns.axon.StackCommandGateway;
+import org.leialearns.axon.model.node.aggregate.ModelNodeHelper;
 import org.leialearns.axon.model.node.command.CreateModelNodeCommand;
 import org.leialearns.axon.model.node.persistence.ModelNodeDocument;
 import org.leialearns.axon.model.node.query.ModelNodeByIdQuery;
@@ -23,13 +24,19 @@ import java.util.concurrent.ExecutionException;
 @Component
 @Slf4j
 public class StateTrackerService implements StateTrackerApiDelegate {
+    private static final SymbolReference[] ROOT_PATH = new SymbolReference[0];
 
+    private final ModelNodeHelper helper;
     private final VocabularyService vocabularyService;
     private final StackCommandGateway commandGateway;
     private final QueryGateway queryGateway;
     private final QueryService queryService;
 
-    public StateTrackerService(VocabularyService vocabularyService, StackCommandGateway commandGateway, QueryGateway queryGateway, QueryService queryService) {
+    public StateTrackerService(
+        ModelNodeHelper helper, VocabularyService vocabularyService,
+        StackCommandGateway commandGateway, QueryGateway queryGateway, QueryService queryService
+    ) {
+        this.helper = helper;
         this.vocabularyService = vocabularyService;
         this.commandGateway = commandGateway;
         this.queryGateway = queryGateway;
@@ -60,12 +67,21 @@ public class StateTrackerService implements StateTrackerApiDelegate {
     }
 
     private String advance(String currentStateId, String vocabulary, String symbolName) throws ExecutionException, InterruptedException {
+        ModelNodeDocument rootNode = null;
+        if (StringUtils.isEmpty(currentStateId)) {
+            rootNode = getOrCreateModelNode(ROOT_PATH);
+            currentStateId = rootNode.getId();
+        }
         Symbol symbol = vocabularyService.getOrCreateSymbolInternal(vocabulary, symbolName);
         SymbolReference symbolReference = new SymbolReference().vocabulary(vocabulary).ordinal(symbol.getOrdinal());
         ModelNodeDocument nextState = queryGateway.query(NextModelNodeQuery.builder().currentNodeId(currentStateId).nextSymbol(symbolReference).build(), ModelNodeDocument.class).get();
         if (nextState == null) {
-            nextState = getOrCreateModelNode(new SymbolReference[0]);
+            if (rootNode == null) {
+                rootNode = getOrCreateModelNode(ROOT_PATH);
+            }
+            nextState = rootNode;
         }
+        log.debug("Next state: {}", nextState);
         if (nextState.getData().isExtensible()) {
             Collection<SymbolReference> currentPath;
             if (StringUtils.isEmpty(currentStateId)) {
@@ -112,7 +128,16 @@ public class StateTrackerService implements StateTrackerApiDelegate {
     }
 
     private ModelNodeDocument getOrCreateModelNode(SymbolReference[] path) {
-        String key = getKey(path);
+        String key = helper.getKey(path);
+        ModelNodeDocument result;
+        try {
+            result = queryGateway.query(ModelNodeByKeyQuery.builder().key(key).build(), ModelNodeDocument.class).get();
+            if (result != null) {
+                return result;
+            }
+        } catch (Exception e) {
+            log.trace("Get by key failed: {}", key);
+        }
         ModelNodeData data = new ModelNodeData();
         data.path(Arrays.asList(path));
         data.key(key);
@@ -125,23 +150,8 @@ public class StateTrackerService implements StateTrackerApiDelegate {
             .sendAndWait(commandGateway);
         log.debug("Result of create model node: {}: {}", key, id);
         Object query = ModelNodeByKeyQuery.builder().key(key).build();
-        ModelNodeDocument result = queryService.queryWithRetry("Get existing Model Node", query, ModelNodeDocument.class);
+        result = queryService.queryWithRetry("Get existing Model Node", query, ModelNodeDocument.class);
         log.debug("Result of query model node: {}: {}", key, Optional.ofNullable(result).map(ModelNodeDocument::getId).orElse(null));
         return result;
-    }
-
-    private String getKey(SymbolReference[] path) {
-        StringBuilder result = new StringBuilder("/");
-        for (SymbolReference symbolReference : path) {
-            result.append("/");
-            result.append(keyProtect(symbolReference.getVocabulary()));
-            result.append(":");
-            result.append(symbolReference.getOrdinal());
-        }
-        return result.toString();
-    }
-
-    private String keyProtect(String part) {
-        return part.replaceAll("%", "%25").replaceAll("/", "%2F").replaceAll(":", "%3A");
     }
 }
