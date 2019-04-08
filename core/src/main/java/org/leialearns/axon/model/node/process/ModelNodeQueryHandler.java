@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.axonframework.queryhandling.QueryHandler;
 import org.bson.types.ObjectId;
 import org.leialearns.axon.model.node.persistence.ModelNodeDocument;
+import org.leialearns.axon.model.node.persistence.TransitionDocument;
 import org.leialearns.axon.model.node.query.ModelNodeByIdQuery;
 import org.leialearns.axon.model.node.query.ModelNodeByKeyQuery;
 import org.leialearns.axon.model.node.query.ModelNodeDescendantsQuery;
@@ -42,13 +43,15 @@ public class ModelNodeQueryHandler {
     }
 
     @QueryHandler
-    public ModelNodeDocument query(NextModelNodeQuery query) {
+    public String query(NextModelNodeQuery query) {
         SymbolReference nextSymbol = query.getNextSymbol();
         Criteria criteria = Criteria.where("sourceId").is(query.getCurrentNodeId())
             .and("symbolReference.vocabulary").is(nextSymbol.getVocabulary())
             .and("symbolReference.ordinal").is(nextSymbol.getOrdinal());
         Query dbQuery = Query.query(criteria);
-        return mongoTemplate.findOne(dbQuery, ModelNodeDocument.class);
+        return Optional.ofNullable(mongoTemplate.findOne(dbQuery, TransitionDocument.class))
+            .map(TransitionDocument::getTargetId)
+            .orElse(null);
     }
 
     @QueryHandler

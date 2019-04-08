@@ -1,0 +1,7 @@
+# Sample interaction file
+!slow 100
+>action:left
+!markExtensible
+>action:left
+!markExtensible
+>action:left

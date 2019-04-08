@@ -113,6 +113,8 @@ sleep 5 # Wait for Axon Server to start
     echo 'Importing vocabularies' >&2
     curl -sS -X POST "${STACK_API_URL}/api/vocabulary-upload" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@action-local.yaml"
     curl -sS -X POST "${STACK_API_URL}/api/vocabulary-upload" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@response-local.yaml"
+    echo 'Importing interaction' >&2
+    curl -sS -X POST "${STACK_API_URL}/api/interaction/upload" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@interaction-local.txt"
     echo 'Imported all' >&2
 
     wait "${PID_STACK}"

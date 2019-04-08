@@ -20,4 +20,15 @@ public class ModelNodeHelper {
     private String keyProtect(String part) {
         return part.replaceAll("%", "%25").replaceAll("/", "%2F").replaceAll(":", "%3A");
     }
+
+    public String show(SymbolReference symbol) {
+        if (symbol == null) {
+            return "???";
+        }
+        return showObject(symbol.getVocabulary()) + ":" + showObject(symbol.getOrdinal());
+    }
+
+    private String showObject(Object object) {
+        return object == null ? "?" : String.valueOf(object);
+    }
 }

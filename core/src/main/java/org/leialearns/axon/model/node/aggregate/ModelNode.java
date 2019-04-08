@@ -6,14 +6,22 @@ import lombok.extern.slf4j.Slf4j;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.AggregateIdentifier;
+import org.axonframework.queryhandling.QueryGateway;
 import org.axonframework.spring.stereotype.Aggregate;
 import org.leialearns.axon.model.node.command.CreateModelNodeCommandUnsafe;
 import org.leialearns.axon.model.node.command.ModelNodeSetExtensibleCommand;
+import org.leialearns.axon.model.node.command.ModelStepCommand;
 import org.leialearns.axon.model.node.event.ModelNodeCreatedEvent;
 import org.leialearns.axon.model.node.event.ModelNodeWasMarkedAsExtensibleEvent;
+import org.leialearns.axon.model.node.event.ModelStepEvent;
+import org.leialearns.axon.model.node.query.ModelNodeDescendantsQuery;
 import org.leialearns.axon.once.CascadingCommandTracker;
 import org.leialearns.axon.once.CommandCounter;
 import org.leialearns.axon.once.TriggerCommandOnceService;
+import org.leialearns.model.SymbolReference;
+import org.leialearns.util.StreamUtil;
+
+import java.util.*;
 
 @Aggregate
 @Getter
@@ -25,12 +33,17 @@ public class ModelNode implements CascadingCommandTracker {
     private String id;
 
     private CommandCounter commandCounter;
+
+    private SymbolReference mostRecent = null;
     private boolean extensible = false;
+    private Set<String> incoming = new HashSet<>();
 
     @CommandHandler
-    public ModelNode(CreateModelNodeCommandUnsafe command) {
+    public ModelNode(CreateModelNodeCommandUnsafe command, ModelNodeHelper helper, QueryGateway queryGateway) {
         id = command.getId();
         ModelNodeCreatedEvent.builder().id(id).data(command.getData()).build().apply();
+        Collection<SymbolReference> path = command.getData().getPath();
+        addTransitions(path, helper, queryGateway);
     }
 
     @EventSourcingHandler
@@ -40,6 +53,38 @@ public class ModelNode implements CascadingCommandTracker {
         }
         id = event.getId();
         extensible = event.getData().isExtensible();
+        Collection<SymbolReference> path = event.getData().getPath();
+        if (!path.isEmpty()) {
+            mostRecent = path.iterator().next();
+        }
+    }
+
+    private void addTransitions(Collection<SymbolReference> path, ModelNodeHelper helper, QueryGateway queryGateway) {
+        if (path.isEmpty()) {
+            log.debug("Path is empty");
+            return;
+        }
+        Iterator<SymbolReference> it = path.iterator();
+        SymbolReference first = it.next();
+        String key = helper.getKey(StreamUtil.asStream(() -> it).toArray(SymbolReference[]::new));
+        try {
+            String[] sourceIds = queryGateway.query(ModelNodeDescendantsQuery.builder().keyPrefix(key).build(), String[].class).get();
+            log.debug("Number of source identifiers: {}", sourceIds.length);
+            for (String sourceId : sourceIds) {
+                addTransition(sourceId, first, id);
+            }
+        } catch (Exception e) {
+            log.warn("Exception while adding transitions", e);
+        }
+    }
+
+    private void addTransition(String sourceId, SymbolReference first, String id) {
+        ModelStepEvent.builder()
+            .previousModelNodeId(sourceId)
+            .symbol(first)
+            .id(id)
+            .build()
+            .apply();
     }
 
     @CommandHandler
@@ -57,5 +102,31 @@ public class ModelNode implements CascadingCommandTracker {
     @EventSourcingHandler
     public void on(ModelNodeWasMarkedAsExtensibleEvent event) {
         extensible = true;
+    }
+
+    @CommandHandler
+    public void handle(ModelStepCommand command, ModelNodeHelper helper) {
+        String sourceId = command.getPreviousModelNodeId();
+        SymbolReference symbol = command.getSymbol();
+        String symbolLabel = helper.show(symbol);
+        if (mostRecent != null && !mostRecent.equals(command.getSymbol())) {
+            throw new IllegalArgumentException(String.format("Step symbol mismatch: %s -(%s)-> %s: %s", sourceId, symbolLabel, id, mostRecent));
+        }
+        if (incoming.contains(sourceId)) {
+            log.trace("Already registered: {} -({})-> {}", sourceId, symbolLabel, id);
+            return;
+        }
+        log.debug("Model step: {} -({})-> {}", sourceId, symbolLabel, id);
+        ModelStepEvent.builder()
+            .previousModelNodeId(sourceId)
+            .symbol(symbol)
+            .id(id)
+            .build()
+            .apply();
+    }
+
+    @EventSourcingHandler
+    public void on(ModelStepEvent event) {
+        incoming.add(event.getPreviousModelNodeId());
     }
 }

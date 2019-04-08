@@ -6,6 +6,7 @@ import org.bson.types.ObjectId;
 import org.leialearns.axon.StackCommandGateway;
 import org.leialearns.axon.model.node.aggregate.ModelNodeHelper;
 import org.leialearns.axon.model.node.command.CreateModelNodeCommand;
+import org.leialearns.axon.model.node.command.ModelStepCommand;
 import org.leialearns.axon.model.node.persistence.ModelNodeDocument;
 import org.leialearns.axon.model.node.query.ModelNodeByIdQuery;
 import org.leialearns.axon.model.node.query.ModelNodeByKeyQuery;
@@ -57,7 +58,7 @@ public class StateTrackerService implements StateTrackerApiDelegate {
     @Override
     public ResponseEntity<String> recordPerceptionStep(String currentStateId, String vocabulary, String symbol) {
         try {
-            // TODO: record symbol on current state
+            recordSymbol(currentStateId, vocabulary, symbol);
             String nextStateId = advance(currentStateId, vocabulary, symbol);
             return ResponseEntity.ok(nextStateId);
         } catch (Exception e) {
@@ -66,7 +67,13 @@ public class StateTrackerService implements StateTrackerApiDelegate {
         }
     }
 
-    private String advance(String currentStateId, String vocabulary, String symbolName) throws ExecutionException, InterruptedException {
+    public void recordSymbol(String currentStateId, String vocabulary, String symbol) {
+        log.debug("Rocord symbol: {} -> {}:{}", currentStateId, vocabulary, symbol);
+        // TODO: record symbol on current state
+    }
+
+    public String advance(String currentStateId, String vocabulary, String symbolName) throws ExecutionException, InterruptedException {
+        log.debug("Advance: {} -({}:{})-> ?", currentStateId, vocabulary, symbolName);
         ModelNodeDocument rootNode = null;
         if (StringUtils.isEmpty(currentStateId)) {
             rootNode = getOrCreateModelNode(ROOT_PATH);
@@ -74,15 +81,19 @@ public class StateTrackerService implements StateTrackerApiDelegate {
         }
         Symbol symbol = vocabularyService.getOrCreateSymbolInternal(vocabulary, symbolName);
         SymbolReference symbolReference = new SymbolReference().vocabulary(vocabulary).ordinal(symbol.getOrdinal());
-        ModelNodeDocument nextState = queryGateway.query(NextModelNodeQuery.builder().currentNodeId(currentStateId).nextSymbol(symbolReference).build(), ModelNodeDocument.class).get();
-        if (nextState == null) {
+        String nextStateId = queryGateway.query(NextModelNodeQuery.builder().currentNodeId(currentStateId).nextSymbol(symbolReference).build(), String.class).get();
+        ModelNodeData nextState;
+        if (nextStateId == null) {
             if (rootNode == null) {
                 rootNode = getOrCreateModelNode(ROOT_PATH);
             }
-            nextState = rootNode;
+            nextStateId = rootNode.getId();
+            nextState = rootNode.getData();
+        } else {
+            nextState = queryGateway.query(ModelNodeByIdQuery.builder().id(nextStateId).build(), ModelNodeData.class).get();
         }
-        log.debug("Next state: {}", nextState);
-        if (nextState.getData().isExtensible()) {
+        if (nextState.isExtensible()) {
+            log.debug("Next state before extending: {}", nextState);
             Collection<SymbolReference> currentPath;
             if (StringUtils.isEmpty(currentStateId)) {
                 currentPath = Collections.emptyList();
@@ -91,20 +102,21 @@ public class StateTrackerService implements StateTrackerApiDelegate {
                 currentPath = Optional.ofNullable(currentState).map(ModelNodeData::getPath).orElse(Collections.emptyList());
             }
             SymbolReference[] nextPath = null;
-            if (nextState.getData().getPath().isEmpty()) {
+            if (nextState.getPath().isEmpty()) {
                 nextPath = new SymbolReference[] {new SymbolReference().vocabulary(vocabulary).ordinal(symbol.getOrdinal())};
-            } else if (currentPath.size() >= nextState.getData().getPath().size()) {
+            } else if (currentPath.size() >= nextState.getPath().size()) {
                 nextPath = extendPath(currentPath, symbolReference, nextState);
             }
             if (nextPath != null) {
-                nextState = getOrCreateModelNode(nextPath);
+                nextStateId = getOrCreateModelNode(nextPath).getId();
             }
         }
-        return nextState.getId();
+        recordStep(currentStateId, symbol, nextStateId);
+        return nextStateId;
     }
 
-    private SymbolReference[] extendPath(Iterable<SymbolReference> currentPath, SymbolReference symbolReference, ModelNodeDocument nextState) {
-        Collection<SymbolReference> path = nextState.getData().getPath();
+    private SymbolReference[] extendPath(Iterable<SymbolReference> currentPath, SymbolReference symbolReference, ModelNodeData nextState) {
+        Collection<SymbolReference> path = nextState.getPath();
         SymbolReference[] result = new SymbolReference[path.size() + 1];
         Iterator<SymbolReference> it = path.iterator();
         SymbolReference first = it.next();
@@ -153,5 +165,16 @@ public class StateTrackerService implements StateTrackerApiDelegate {
         result = queryService.queryWithRetry("Get existing Model Node", query, ModelNodeDocument.class);
         log.debug("Result of query model node: {}: {}", key, Optional.ofNullable(result).map(ModelNodeDocument::getId).orElse(null));
         return result;
+    }
+
+    private void recordStep(String currentStateId, Symbol symbol, String nextStateId) {
+        log.debug("Next state: {}", nextStateId);
+        SymbolReference symbolReference = new SymbolReference().vocabulary(symbol.getVocabulary()).ordinal(symbol.getOrdinal());
+        ModelStepCommand.builder()
+            .previousModelNodeId(currentStateId)
+            .symbol(symbolReference)
+            .id(nextStateId)
+            .build()
+            .send(commandGateway);
     }
 }

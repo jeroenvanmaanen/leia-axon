@@ -65,6 +65,22 @@ paths:
           description: Perception recorded
           schema:
             type: string
+  /api/interaction/upload:
+    post:
+      tags:
+      - Interaction
+      description: Upload interaction
+      operationId: uploadInteraction
+      consumes:
+      - multipart/form-data
+      parameters:
+      - in: formData
+        name: data
+        description: The data to upload
+        type: file
+      responses:
+        200:
+          description: Successful operation
   /api/model/structure/node/{modelNodeId}/mark-extensible:
     post:
       tags:
