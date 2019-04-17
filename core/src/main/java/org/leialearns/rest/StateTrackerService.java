@@ -68,7 +68,7 @@ public class StateTrackerService implements StateTrackerApiDelegate {
     }
 
     public void recordSymbol(String currentStateId, String vocabulary, String symbol) {
-        log.debug("Rocord symbol: {} -> {}:{}", currentStateId, vocabulary, symbol);
+        log.debug("Record symbol: {} -> {}:{}", currentStateId, vocabulary, symbol);
         // TODO: record symbol on current state
     }
 
