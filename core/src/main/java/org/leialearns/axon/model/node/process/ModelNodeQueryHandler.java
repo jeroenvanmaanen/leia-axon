@@ -6,10 +6,7 @@ import org.bson.types.ObjectId;
 import org.leialearns.axon.model.node.aggregate.ModelNodeHelper;
 import org.leialearns.axon.model.node.persistence.ModelNodeDocument;
 import org.leialearns.axon.model.node.persistence.TransitionDocument;
-import org.leialearns.axon.model.node.query.ModelNodeByIdQuery;
-import org.leialearns.axon.model.node.query.ModelNodeByKeyQuery;
-import org.leialearns.axon.model.node.query.ModelNodeDescendantsQuery;
-import org.leialearns.axon.model.node.query.NextModelNodeQuery;
+import org.leialearns.axon.model.node.query.*;
 import org.leialearns.model.ModelNodeData;
 import org.leialearns.model.SymbolReference;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -72,6 +69,40 @@ public class ModelNodeQueryHandler {
             log.warn("Exception while executing ModelNodeDescendantsQuery", e);
             throw e;
         }
+    }
+
+    @QueryHandler
+    public ModelNodeDocument[] query(ModelNodeChildrenQuery query) {
+        try {
+            return findChildren(query.getPathPrefix());
+        } catch (RuntimeException e) {
+            log.warn("Exception while executing ModelNodeChildrenQuery", e);
+            throw e;
+        }
+    }
+
+    @QueryHandler
+    public ModelNodeDocument[] query(ModelNodeChildrenByIdQuery query) {
+        try {
+            ModelNodeDocument node = mongoTemplate.findById(query.getNodeId(), ModelNodeDocument.class);
+            if (node == null) {
+                throw new IllegalArgumentException(String.format("Node not found: %s", query.getNodeId()));
+            }
+            return findChildren(node.getData().getPath().toArray(new SymbolReference[0]));
+        } catch (RuntimeException e) {
+            log.warn("Exception while executing ModelNodeChildrenByIdQuery", e);
+            throw e;
+        }
+    }
+
+    private ModelNodeDocument[] findChildren(SymbolReference[] pathPrefix) {
+        String pattern = getPrefixPattern(pathPrefix);
+        log.debug("Prefix pattern: /{}/", pattern);
+        Query dbQuery = Query.query(Criteria.where("data.key").regex(pattern).and("data.depth").is(pathPrefix.length + 1));
+        return mongoTemplate.find(dbQuery, ModelNodeDocument.class)
+            .stream()
+            .peek(node -> log.debug("Child: {}", node.getData().getKey()))
+            .toArray(ModelNodeDocument[]::new);
     }
 
     private String getPrefixPattern(SymbolReference[] pathPrefix) {

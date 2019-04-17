@@ -92,6 +92,23 @@ paths:
           description: Root node ID
           schema:
             type: string
+  /api/model/structure/node/{modelNodeId}/children:
+    get:
+      tags:
+      - ModelStructure
+      description: Get the child nodes of a given node
+      operationId: getChildren
+      parameters:
+      - in: path
+        name: modelNodeId
+        description: The ID of the Model Node
+        required: true
+        type: string
+      responses:
+        200:
+          description: Child nodes
+          schema:
+            $ref: "#/definitions/ArrayOfModelNodeData"
   /api/model/structure/node/{modelNodeId}/mark-extensible:
     post:
       tags:
@@ -244,6 +261,9 @@ definitions:
   ModelNodeData:
     type: object
     properties:
+      id:
+        description: Unique ID
+        type: string
       path:
         description: Symbol IDs most recent first
         type: array
@@ -257,6 +277,10 @@ definitions:
       extensible:
         description: Flag to indicate whether child nodes for this node may be created
         type: boolean
+  ArrayOfModelNodeData:
+    type: array
+    items:
+      $ref: "#/definitions/ModelNodeData"
   Symbol:
     type: object
     properties:

@@ -43,6 +43,7 @@ public class ModelNode implements CascadingCommandTracker {
     public ModelNode(CreateModelNodeCommandUnsafe command, QueryGateway queryGateway) {
         id = command.getId();
         ModelNodeData data = command.getData();
+        data.setId(id);
         data.setDepth(data.getPath().size());
         ModelNodeCreatedEvent.builder().id(id).data(command.getData()).build().apply();
         Collection<SymbolReference> path = command.getData().getPath();
