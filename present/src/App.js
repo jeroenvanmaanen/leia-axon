@@ -1,13 +1,14 @@
 import React, { Component } from 'react';
 import './App.css';
+import Structure from './Structure';
 
 class App extends Component {
 
   render() {
-    const hide = {"display":"none"}
     return (
       <div className="App">
-        <div style={hide}>TODO: Add greeter</div>
+        <div className="header">LEIA learns &#187; Model Structure</div>
+        <Structure />
       </div>
     );
   }

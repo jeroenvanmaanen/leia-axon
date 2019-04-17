@@ -6,59 +6,41 @@
   font-size: 1.5em;
 }
 
-.todo {
-  background: yellow;
-}
-.valid {
-  background: #33ff33;
-}
-.invalid {
-  background: #ff3333;
-}
-
-th,
-td {
-    text-align: left;
-    vertical-align: text-top;
-}
-
-.Compound {
-    position: fixed;
-    bottom: 10px;
-    right: 10px;
-    background: yellow;
-    width: 500px;
-    border: 2px solid black;
-    padding: 5px;
-}
-
-.compoundInput {
-    width: 393px;
-}
-
-.compoundMember {
-    background: yellow;
-}
-
-.key_amountCents {
-    text-align: right;
-}
-
 .hidden {
-    display: none;
+  display: none;
 }
 
-.compoundJars,
-.compoundJars div {
-    display: inline-block;
+.tree {
+  display: table-row;
 }
-.compoundJars > div > div {
-    padding: 3px;
+.node,
+.children {
+  display: table-cell;
 }
-.compoundJars > .unaffected > div.compoundJar {
-    display: none;
-    color: #c80;
+
+.node {
+  padding-left: 5px;
 }
-.compoundJars:hover > .unaffected > div.compoundJar {
-    display: inline-block;
+.label {
+  background-color: #CCE;
+  padding: 2px;
+}
+.toggle {
+  color: #66A;
+}
+
+.children {
+  padding-right: 5px;
+  border-style: solid;
+  border-width: 0 2px 0 0;
+  border-color: black;
+}
+
+.header {
+  width: 100%;
+  font-size: larger;
+  background-color: #9999CC;
+  padding: 5px 0 5px 1em;
+  margin-left: -1em;
+  margin-bottom: 1em;
 }
