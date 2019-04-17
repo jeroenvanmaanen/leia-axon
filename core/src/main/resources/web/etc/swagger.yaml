@@ -249,6 +249,8 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/SymbolReference"
+      depth:
+        type: integer
       key:
         description: Unique readable representation
         type: string

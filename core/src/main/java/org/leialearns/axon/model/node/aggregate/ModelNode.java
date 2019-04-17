@@ -18,6 +18,7 @@ import org.leialearns.axon.model.node.query.ModelNodeDescendantsQuery;
 import org.leialearns.axon.once.CascadingCommandTracker;
 import org.leialearns.axon.once.CommandCounter;
 import org.leialearns.axon.once.TriggerCommandOnceService;
+import org.leialearns.model.ModelNodeData;
 import org.leialearns.model.SymbolReference;
 import org.leialearns.util.StreamUtil;
 
@@ -41,6 +42,8 @@ public class ModelNode implements CascadingCommandTracker {
     @CommandHandler
     public ModelNode(CreateModelNodeCommandUnsafe command, QueryGateway queryGateway) {
         id = command.getId();
+        ModelNodeData data = command.getData();
+        data.setDepth(data.getPath().size());
         ModelNodeCreatedEvent.builder().id(id).data(command.getData()).build().apply();
         Collection<SymbolReference> path = command.getData().getPath();
         addTransitions(path, queryGateway);
