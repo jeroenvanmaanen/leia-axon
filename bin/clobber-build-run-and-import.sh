@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+## ~/src/leia/bin/clobber-build-run-and-import.sh -v --tee ~/src/leia/tmp/leia.log --skip-build --dev
+
 set -e
 
 BIN="$(cd "$(dirname "$0")" ; pwd)"
