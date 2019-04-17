@@ -39,11 +39,11 @@ public class ModelNode implements CascadingCommandTracker {
     private Set<String> incoming = new HashSet<>();
 
     @CommandHandler
-    public ModelNode(CreateModelNodeCommandUnsafe command, ModelNodeHelper helper, QueryGateway queryGateway) {
+    public ModelNode(CreateModelNodeCommandUnsafe command, QueryGateway queryGateway) {
         id = command.getId();
         ModelNodeCreatedEvent.builder().id(id).data(command.getData()).build().apply();
         Collection<SymbolReference> path = command.getData().getPath();
-        addTransitions(path, helper, queryGateway);
+        addTransitions(path, queryGateway);
     }
 
     @EventSourcingHandler
@@ -59,16 +59,16 @@ public class ModelNode implements CascadingCommandTracker {
         }
     }
 
-    private void addTransitions(Collection<SymbolReference> path, ModelNodeHelper helper, QueryGateway queryGateway) {
+    private void addTransitions(Collection<SymbolReference> path, QueryGateway queryGateway) {
         if (path.isEmpty()) {
             log.debug("Path is empty");
             return;
         }
         Iterator<SymbolReference> it = path.iterator();
         SymbolReference first = it.next();
-        String key = helper.getKey(StreamUtil.asStream(() -> it).toArray(SymbolReference[]::new));
+        SymbolReference[] pathPrefix = StreamUtil.asStream(() -> it).toArray(SymbolReference[]::new);
         try {
-            String[] sourceIds = queryGateway.query(ModelNodeDescendantsQuery.builder().keyPrefix(key).build(), String[].class).get();
+            String[] sourceIds = queryGateway.query(ModelNodeDescendantsQuery.builder().pathPrefix(pathPrefix).build(), String[].class).get();
             log.debug("Number of source identifiers: {}", sourceIds.length);
             for (String sourceId : sourceIds) {
                 addTransition(sourceId, first, id);

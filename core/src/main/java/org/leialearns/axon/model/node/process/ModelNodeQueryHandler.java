@@ -3,6 +3,7 @@ package org.leialearns.axon.model.node.process;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.queryhandling.QueryHandler;
 import org.bson.types.ObjectId;
+import org.leialearns.axon.model.node.aggregate.ModelNodeHelper;
 import org.leialearns.axon.model.node.persistence.ModelNodeDocument;
 import org.leialearns.axon.model.node.persistence.TransitionDocument;
 import org.leialearns.axon.model.node.query.ModelNodeByIdQuery;
@@ -23,9 +24,11 @@ import java.util.Optional;
 public class ModelNodeQueryHandler {
 
     private final MongoTemplate mongoTemplate;
+    private final ModelNodeHelper helper;
 
-    public ModelNodeQueryHandler(MongoTemplate mongoTemplate) {
+    public ModelNodeQueryHandler(MongoTemplate mongoTemplate, ModelNodeHelper helper) {
         this.mongoTemplate = mongoTemplate;
+        this.helper = helper;
     }
 
     @QueryHandler
@@ -57,7 +60,7 @@ public class ModelNodeQueryHandler {
     @QueryHandler
     public String[] query(ModelNodeDescendantsQuery query) {
         try {
-            String pattern = getPrefixPattern(query.getKeyPrefix());
+            String pattern = getPrefixPattern(query.getPathPrefix());
             log.debug("Prefix pattern: /{}/", pattern);
             Query dbQuery = Query.query(Criteria.where("data.key").regex(pattern));
             return mongoTemplate.find(dbQuery, ModelNodeDocument.class)
@@ -71,7 +74,8 @@ public class ModelNodeQueryHandler {
         }
     }
 
-    private String getPrefixPattern(String keyPrefix) {
+    private String getPrefixPattern(SymbolReference[] pathPrefix) {
+        String keyPrefix = helper.getKey(pathPrefix);
         return "^" + keyPrefix.replaceAll("([\\\\(){}|?*+^$\\[\\]])", "\\\\\\1");
     }
 }

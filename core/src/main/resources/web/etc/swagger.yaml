@@ -81,6 +81,17 @@ paths:
       responses:
         200:
           description: Successful operation
+  /api/model/structure/root:
+    get:
+      tags:
+      - ModelStructure
+      description: Get the ID of the root node
+      operationId: getRootNodeId
+      responses:
+        200:
+          description: Root node ID
+          schema:
+            type: string
   /api/model/structure/node/{modelNodeId}/mark-extensible:
     post:
       tags:
