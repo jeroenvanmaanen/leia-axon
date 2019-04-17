@@ -18,9 +18,9 @@ class Structure extends Component {
     const rootId = this.state.rootId;
     console.log('Render: Root ID:', rootId);
     if (rootId === null) {
-      return (<div>No root node</div>);
+      return (<div className='structure'>No root node</div>);
     } else {
-      return (<ModelNode nodeId={rootId} getSymbol={this.state.getSymbol} />);
+      return (<div className='structure'><ModelNode nodeId={rootId} getSymbol={this.state.getSymbol} /></div>);
     }
   }
 

@@ -1,5 +1,6 @@
 .App {
   padding-left: 1em;
+  padding-right: 1em;
 }
 
 .App-title {
@@ -12,6 +13,7 @@
 
 .tree {
   display: table-row;
+  float: right;
 }
 .node,
 .children {
@@ -20,6 +22,7 @@
 
 .node {
   padding-left: 5px;
+  vertical-align: top;
 }
 .label {
   background-color: #CCE;
@@ -38,11 +41,18 @@
   border-color: black;
 }
 
+.child {
+  box-sizing: border-box;
+  width: 100%;
+  overflow: auto;
+}
+
 .header {
   width: 100%;
   font-size: larger;
   background-color: #9999CC;
-  padding: 5px 0 5px 1em;
+  padding: 5px 1em 5px 1em;
   margin-left: -1em;
+  margin-right: -1em;
   margin-bottom: 1em;
 }
