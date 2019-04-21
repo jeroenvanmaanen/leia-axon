@@ -62,7 +62,7 @@ public class ModelNodeQueryHandler {
             Query dbQuery = Query.query(Criteria.where("data.key").regex(pattern));
             return mongoTemplate.find(dbQuery, ModelNodeDocument.class)
                 .stream()
-                .peek(node -> log.debug("Descendant: {}", node.getData().getKey()))
+                .peek(node -> log.trace("Descendant: {}", node.getData().getKey()))
                 .map(ModelNodeDocument::getId)
                 .toArray(String[]::new);
         } catch (RuntimeException e) {

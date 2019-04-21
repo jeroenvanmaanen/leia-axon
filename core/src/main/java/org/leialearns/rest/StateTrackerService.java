@@ -161,8 +161,12 @@ public class StateTrackerService implements StateTrackerApiDelegate {
             .build()
             .sendAndWait(commandGateway);
         log.debug("Result of create model node: {}: {}", key, id);
-        Object query = ModelNodeByKeyQuery.builder().key(key).build();
-        result = queryService.queryWithRetry("Get existing Model Node", query, ModelNodeDocument.class);
+        if (id == null) {
+            Object query = ModelNodeByKeyQuery.builder().key(key).build();
+            result = queryService.queryWithRetry("Get existing Model Node", query, ModelNodeDocument.class);
+        } else {
+            result = ModelNodeDocument.builder().id(id).data(data).build();
+        }
         log.debug("Result of query model node: {}: {}", key, Optional.ofNullable(result).map(ModelNodeDocument::getId).orElse(null));
         return result;
     }
