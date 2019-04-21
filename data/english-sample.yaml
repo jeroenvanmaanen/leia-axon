@@ -1,0 +1,9 @@
+%YAML 1.2
+---
+type: CREATE_VOCABULARY
+symbol:
+  vocabulary: en
+---
+type: DECLARE_VOCABULARY_OPEN
+symbol:
+  vocabulary: en
