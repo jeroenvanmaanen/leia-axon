@@ -6,6 +6,7 @@ import org.bson.types.ObjectId;
 import org.leialearns.axon.StackCommandGateway;
 import org.leialearns.axon.model.node.aggregate.ModelNodeHelper;
 import org.leialearns.axon.model.node.command.CreateModelNodeCommand;
+import org.leialearns.axon.model.node.command.ModelNodeFetchChildCommand;
 import org.leialearns.axon.model.node.command.ModelStepCommand;
 import org.leialearns.axon.model.node.persistence.ModelNodeDocument;
 import org.leialearns.axon.model.node.query.ModelNodeByIdQuery;
@@ -25,7 +26,6 @@ import java.util.concurrent.ExecutionException;
 @Component
 @Slf4j
 public class StateTrackerService implements StateTrackerApiDelegate {
-    private static final SymbolReference[] ROOT_PATH = new SymbolReference[0];
 
     private final ModelNodeHelper helper;
     private final VocabularyService vocabularyService;
@@ -76,7 +76,7 @@ public class StateTrackerService implements StateTrackerApiDelegate {
         log.debug("Advance: {} -({}:{})-> ?", currentStateId, vocabulary, symbolName);
         ModelNodeDocument rootNode = null;
         if (StringUtils.isEmpty(currentStateId)) {
-            rootNode = getOrCreateModelNode(ROOT_PATH);
+            rootNode = getOrCreateRootNode();
             currentStateId = rootNode.getId();
         }
         Symbol symbol = vocabularyService.getOrCreateSymbolInternal(vocabulary, symbolName);
@@ -85,7 +85,7 @@ public class StateTrackerService implements StateTrackerApiDelegate {
         ModelNodeData nextState;
         if (nextStateId == null) {
             if (rootNode == null) {
-                rootNode = getOrCreateModelNode(ROOT_PATH);
+                rootNode = getOrCreateRootNode();
             }
             nextStateId = rootNode.getId();
             nextState = rootNode.getData();
@@ -94,52 +94,28 @@ public class StateTrackerService implements StateTrackerApiDelegate {
         }
         if (nextState.isExtensible()) {
             log.debug("Next state before extending: {}", nextState);
-            Collection<SymbolReference> currentPath;
+            List<SymbolReference> currentPath;
             if (StringUtils.isEmpty(currentStateId)) {
                 currentPath = Collections.emptyList();
             } else {
                 ModelNodeData currentState = queryGateway.query(ModelNodeByIdQuery.builder().id(currentStateId).build(), ModelNodeData.class).get();
                 currentPath = Optional.ofNullable(currentState).map(ModelNodeData::getPath).orElse(Collections.emptyList());
             }
-            SymbolReference[] nextPath = null;
             if (nextState.getPath().isEmpty()) {
-                nextPath = new SymbolReference[] {new SymbolReference().vocabulary(vocabulary).ordinal(symbol.getOrdinal())};
+                log.debug("Extending root node ({}) with: {}:{} ({})", nextStateId, vocabulary, symbol.getOrdinal(), symbolName);
+                nextStateId = ModelNodeFetchChildCommand.builder().id(nextStateId).symbol(symbolReference).build().sendAndWait(commandGateway);
             } else if (currentPath.size() >= nextState.getPath().size()) {
-                nextPath = extendPath(currentPath, symbolReference, nextState);
-            }
-            if (nextPath != null) {
-                nextStateId = getOrCreateModelNode(nextPath).getId();
+                SymbolReference extension = currentPath.get(nextState.getPath().size() - 1);
+                log.debug("Extending node ({}) with: {}:{}", nextStateId, extension.getVocabulary(), extension.getOrdinal());
+                nextStateId = ModelNodeFetchChildCommand.builder().id(nextStateId).symbol(extension).build().sendAndWait(commandGateway);
             }
         }
         recordStep(currentStateId, symbol, nextStateId);
         return nextStateId;
     }
 
-    private SymbolReference[] extendPath(Iterable<SymbolReference> currentPath, SymbolReference symbolReference, ModelNodeData nextState) {
-        Collection<SymbolReference> path = nextState.getPath();
-        SymbolReference[] result = new SymbolReference[path.size() + 1];
-        Iterator<SymbolReference> it = path.iterator();
-        SymbolReference first = it.next();
-        if (!Objects.equals(first, symbolReference)) {
-            throw new IllegalStateException("Last symbol mismatch");
-        }
-        int i = 0;
-        result[i++] = symbolReference;
-        for (SymbolReference ref : currentPath) {
-            result[i++] = ref;
-            if (it.hasNext()) {
-                SymbolReference otherRef = it.next();
-                if (!Objects.equals(ref, otherRef)) {
-                    throw new IllegalStateException("Symbol mismatch");
-                }
-            } else {
-                break;
-            }
-        }
-        return result;
-    }
-
-    private ModelNodeDocument getOrCreateModelNode(SymbolReference[] path) {
+    private ModelNodeDocument getOrCreateRootNode() {
+        List<SymbolReference> path = Collections.emptyList();
         String key = helper.getKey(path);
         ModelNodeDocument result;
         try {
@@ -151,9 +127,9 @@ public class StateTrackerService implements StateTrackerApiDelegate {
             log.trace("Get by key failed: {}", key);
         }
         ModelNodeData data = new ModelNodeData();
-        data.path(Arrays.asList(path));
+        data.path(path);
         data.key(key);
-        data.extensible(path.length < 1); // Only the root node is extensible by default
+        data.extensible(true); // The root node is extensible by default
         String id = CreateModelNodeCommand.builder()
             .id(ObjectId.get().toString())
             .data(data)

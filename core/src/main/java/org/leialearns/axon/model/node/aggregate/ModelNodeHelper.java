@@ -3,10 +3,16 @@ package org.leialearns.axon.model.node.aggregate;
 import org.leialearns.model.SymbolReference;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+
 @Component
 public class ModelNodeHelper {
 
     public String getKey(SymbolReference[] path) {
+        return getKey(Arrays.asList(path));
+    }
+
+    public String getKey(Iterable<SymbolReference> path) {
         StringBuilder result = new StringBuilder("/");
         for (SymbolReference symbolReference : path) {
             result.append(keyProtect(symbolReference.getVocabulary()));

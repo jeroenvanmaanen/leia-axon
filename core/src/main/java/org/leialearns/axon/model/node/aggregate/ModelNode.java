@@ -8,9 +8,13 @@ import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.AggregateIdentifier;
 import org.axonframework.queryhandling.QueryGateway;
 import org.axonframework.spring.stereotype.Aggregate;
+import org.bson.types.ObjectId;
+import org.leialearns.axon.StackCommandGateway;
 import org.leialearns.axon.model.node.command.CreateModelNodeCommandUnsafe;
+import org.leialearns.axon.model.node.command.ModelNodeFetchChildCommand;
 import org.leialearns.axon.model.node.command.ModelNodeSetExtensibleCommand;
 import org.leialearns.axon.model.node.command.ModelStepCommand;
+import org.leialearns.axon.model.node.event.ModelNodeChildAddedEvent;
 import org.leialearns.axon.model.node.event.ModelNodeCreatedEvent;
 import org.leialearns.axon.model.node.event.ModelNodeWasMarkedAsExtensibleEvent;
 import org.leialearns.axon.model.node.event.ModelStepEvent;
@@ -32,16 +36,19 @@ public class ModelNode implements CascadingCommandTracker {
 
     @AggregateIdentifier
     private String id;
+    private List<SymbolReference> path;
 
     private CommandCounter commandCounter;
 
     private SymbolReference mostRecent = null;
     private boolean extensible = false;
-    private Set<String> incoming = new HashSet<>();
+    private final Set<String> incoming = new HashSet<>();
+    private final Map<SymbolReference,String> children = new HashMap<>();
 
     @CommandHandler
     public ModelNode(CreateModelNodeCommandUnsafe command, QueryGateway queryGateway) {
         id = command.getId();
+        path = command.getData().getPath();
         ModelNodeData data = command.getData();
         data.setId(id);
         data.setDepth(data.getPath().size());
@@ -56,6 +63,7 @@ public class ModelNode implements CascadingCommandTracker {
             commandCounter = onceService.createCounter();
         }
         id = event.getId();
+        path = event.getData().getPath();
         extensible = event.getData().isExtensible();
         Collection<SymbolReference> path = event.getData().getPath();
         if (!path.isEmpty()) {
@@ -106,6 +114,36 @@ public class ModelNode implements CascadingCommandTracker {
     @EventSourcingHandler
     public void on(ModelNodeWasMarkedAsExtensibleEvent event) {
         extensible = true;
+    }
+
+    @CommandHandler
+    public String handle(ModelNodeFetchChildCommand command, StackCommandGateway commandGateway, ModelNodeHelper helper) {
+        try {
+            SymbolReference symbol = command.getSymbol();
+            return children.computeIfAbsent(symbol, s -> createChild(symbol, commandGateway, helper));
+        } catch (RuntimeException exception) {
+            log.error("Caught exception", exception);
+            throw exception;
+        }
+    }
+
+    private String createChild(SymbolReference symbol, StackCommandGateway commandGateway, ModelNodeHelper helper) {
+        ModelNodeData data = new ModelNodeData();
+        data.setId(ObjectId.get().toString());
+        List<SymbolReference> childPath = new ArrayList<>(this.path);
+        childPath.add(symbol);
+        data.setPath(childPath);
+        data.setDepth(childPath.size());
+        data.setKey(helper.getKey(childPath));
+        data.setExtensible(false);
+        String childId = CreateModelNodeCommandUnsafe.builder().id(data.getId()).data(data).build().sendAndWait(commandGateway);
+        ModelNodeChildAddedEvent.builder().id(id).childId(childId).symbol(symbol).build().apply();
+        return childId;
+    }
+
+    @EventSourcingHandler
+    public void on(ModelNodeChildAddedEvent event) {
+        children.put(event.getSymbol(), event.getChildId());
     }
 
     @CommandHandler
