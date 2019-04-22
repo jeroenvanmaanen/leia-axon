@@ -7,6 +7,7 @@ import org.leialearns.axon.StackCommandGateway;
 import org.leialearns.axon.model.node.aggregate.ModelNodeHelper;
 import org.leialearns.axon.model.node.command.CreateModelNodeCommand;
 import org.leialearns.axon.model.node.command.ModelNodeFetchChildCommand;
+import org.leialearns.axon.model.node.command.ModelNodeSetExtensibleCommand;
 import org.leialearns.axon.model.node.command.ModelStepCommand;
 import org.leialearns.axon.model.node.persistence.ModelNodeDocument;
 import org.leialearns.axon.model.node.query.ModelNodeByIdQuery;
@@ -94,11 +95,12 @@ public class StateTrackerService implements StateTrackerApiDelegate {
         }
         if (nextState.isExtensible()) {
             log.debug("Next state before extending: {}", nextState);
+            ModelNodeData currentState = null;
             List<SymbolReference> currentPath;
             if (StringUtils.isEmpty(currentStateId)) {
                 currentPath = Collections.emptyList();
             } else {
-                ModelNodeData currentState = queryGateway.query(ModelNodeByIdQuery.builder().id(currentStateId).build(), ModelNodeData.class).get();
+                currentState = queryGateway.query(ModelNodeByIdQuery.builder().id(currentStateId).build(), ModelNodeData.class).get();
                 currentPath = Optional.ofNullable(currentState).map(ModelNodeData::getPath).orElse(Collections.emptyList());
             }
             if (nextState.getPath().isEmpty()) {
@@ -108,6 +110,10 @@ public class StateTrackerService implements StateTrackerApiDelegate {
                 SymbolReference extension = currentPath.get(nextState.getPath().size() - 1);
                 log.debug("Extending node ({}) with: {}:{}", nextStateId, extension.getVocabulary(), extension.getOrdinal());
                 nextStateId = ModelNodeFetchChildCommand.builder().id(nextStateId).symbol(extension).build().sendAndWait(commandGateway);
+            } else if (currentState != null && !currentState.isExtensible()) {
+                log.debug("Marking current node as extensible, because next state is: {}: -({}:{})-> {}",
+                    currentStateId, vocabulary, symbolName, nextStateId);
+                ModelNodeSetExtensibleCommand.builder().id(currentStateId).build().send(commandGateway);
             }
         }
         recordStep(currentStateId, symbol, nextStateId);
