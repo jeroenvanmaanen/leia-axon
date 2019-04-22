@@ -23,17 +23,26 @@ class ModelNode extends Component {
   render() {
     // const nodeId = this.state.nodeId;
     // console.log('Model node render: Node ID:', nodeId);
-    return (<div className='tree'>
-      <div className='children'>
-        {this.state.open
-          ? this.state.children.map(child => {
-              return (<div key={child.id} className='child'><ModelNode nodeId={child.id} symbol={child.lastSymbol} getSymbol={this.state.getSymbol} /></div>);
-            })
-          : (<div />)
-        }
-      </div>
-      <div className='node' onClick={this.handleOpenCloseToggle}><span className='label'><span className='toggle'>{this.state.open ? '▼' : '▶'}</span> {this.state.label}</span></div>
-    </div>);
+    const children = this.state.children;
+    const width = children ? children.length : '?';
+    const leaf = !children || children.length === 0;
+    if (leaf) {
+      return (<div className='tree'>
+        <div className='node'><span className='label'>{this.state.label}</span></div>
+      </div>);
+    } else {
+      return (<div className='tree'>
+        <div className='children'>
+          {this.state.open
+            ? this.state.children.map(child => {
+                return (<div key={child.id} className='child'><ModelNode nodeId={child.id} symbol={child.lastSymbol} getSymbol={this.state.getSymbol} /></div>);
+              })
+            : (<div />)
+          }
+        </div>
+        <div className='node' onClick={this.handleOpenCloseToggle}><span className='label'>({width}) <span className='toggle'>{this.state.open ? '▼' : '▶'}</span> {this.state.label}</span></div>
+      </div>);
+    }
   }
 
   async fetchLabel() {
@@ -57,10 +66,12 @@ class ModelNode extends Component {
     const self = this;
     const nodeId = this.state.nodeId;
     const children = (await REST('/api/model/structure/node/' + nodeId + '/children')).entity;
-    children.forEach(child => {
+    if (children) {
+      children.forEach(child => {
         child.lastSymbol = self.lastSymbol(child);
-    });
-    // console.log('Children:', nodeId, children);
+      });
+      // console.log('Children:', nodeId, children);
+    }
     this.setState({children: children});
   }
 
