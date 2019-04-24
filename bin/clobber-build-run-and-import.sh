@@ -89,7 +89,13 @@ sleep 5 # Wait for Axon Server to start
         "${BIN}/docker-run-axon-server.sh"
         "${BIN}/docker-run-mongodb.sh"
 
-        ./mvnw -Djansi.force=true clean package
+        docker run --rm \
+            --link leia-mongodb:leia-mongodb \
+            --link leia-axon-server:leia-axon-server \
+            -v '/var/run/docker.sock:/var/run/docker.sock' \
+            -v "${HOME}/.m2:/root/.m2" \
+            -v "${PROJECT}:${PROJECT}" -w "${PROJECT}" \
+            jeroenvm/leia-build:0.2 ./mvnw -Djansi.force=true clean package
 
         docker stop "${STACK}-axon-server"
         docker stop "${STACK}-mongodb"
