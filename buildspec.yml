@@ -1,0 +1,5 @@
+phases:
+  build:
+    commands:
+      - bin/create-local-settings.sh
+      - bin/rebuild.sh
