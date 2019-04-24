@@ -44,9 +44,7 @@ then
     shift
     MONGO_PORTS="
     ports:
-    -
-      target: 27017
-      published: ${MONGO_SERVER_PORT}"
+    - \"127.0.0.1:${MONGO_SERVER_PORT}:27017\""
     PRESENT_SUFFIX='-dev'
     PRESENT_VOLUMES=" Mount local volume for development
     volumes:
