@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
 
-set -ex
+set -e
 
 BIN="$(cd "$(dirname "$0")" ; pwd)"
 PROJECT="$(dirname "${BIN}")"
 
+source "${BIN}/verbose.sh"
+
 : ${STACK:=STACK}
 source "${BIN}/settings-local.sh"
 
-MODULE="$1" ; shift
+MODULE="$1" ; shift || true
 
 (
     cd "${PROJECT}/${MODULE}"

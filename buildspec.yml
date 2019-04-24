@@ -18,7 +18,7 @@ phases:
     commands:
       - echo "Building LEIA-learns"
       - bin/create-local-settings.sh
-      - bin/rebuild.sh
+      - bin/rebuild.sh -v -v
   post_build:
     commands:
       - docker push "jeroenvm/leia-proxy:${IMAGE_VERSION}"
