@@ -11,6 +11,19 @@ http {
         location        ~ ^/api/ {
             proxy_pass  http://leia-core:8080;
         }
+        location        ~ ^/swagger {
+            proxy_pass  http://leia-core:8080;
+        }
+        location        ~ ^/webjars/ {
+            proxy_pass  http://leia-core:8080;
+        }
+        location        ~ ^/etc/swagger.yaml$ {
+            proxy_pass  http://leia-core:8080;
+        }
+        location        ~ ^/v2/api-docs$ {
+            rewrite (.*) /etc/swagger.yaml  break;
+            proxy_pass  http://leia-core:8080;
+        }
         location        ~ ^/ {
             proxy_pass  http://leia-present:3000;
             proxy_http_version 1.1;

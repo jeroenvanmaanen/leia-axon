@@ -1,6 +1,6 @@
 swagger: "2.0"
 info:
-  description: "This is LEIA learns server. [Swagger contract](resources/etc/swagger.yaml)."
+  description: "This is LEIA learns server. [OpenAPI contract](etc/swagger.yaml). [Home](/)."
   version: 1.0.0
   title: LEIA learns
   termsOfService: http://swagger.io/terms/
@@ -9,8 +9,6 @@ info:
   license:
     name: LGPLv3
     url: https://www.gnu.org/licenses/lgpl-3.0.en.html
-## host: localhost
-basePath: /api/greeter
 schemes:
 - http
 consumes: []

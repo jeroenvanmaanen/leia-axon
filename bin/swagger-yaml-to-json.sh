@@ -10,10 +10,10 @@ mkdir -p "${GENERATED_API}"
 
 if [[ ".$1" = '.-x' ]]
 then
-    docker run --rm -v "${PROJECT}:${PROJECT}" -w "${PROJECT}" simplealpine/yaml2json:latest core/src/main/resources/web/etc/swagger.yaml \
+    docker run --rm -v "${PROJECT}:${PROJECT}" -w "${PROJECT}" simplealpine/yaml2json:latest core/src/main/resources/static/etc/swagger.yaml \
         | tee "${GENERATED_API}/swagger.json"
 else
-    docker run --rm -v "${PROJECT}:${PROJECT}" -w "${PROJECT}" simplealpine/yaml2json:latest core/src/main/resources/web/etc/swagger.yaml \
+    docker run --rm -v "${PROJECT}:${PROJECT}" -w "${PROJECT}" simplealpine/yaml2json:latest core/src/main/resources/static/etc/swagger.yaml \
         | docker run --rm -i stedolan/jq . \
         > "${GENERATED_API}/swagger.json"
 fi

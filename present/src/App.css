@@ -7,6 +7,12 @@
   font-size: 1.5em;
 }
 
+.OpenApiLink > img {
+    float: left;
+    margin-right: 4px;
+    margin-top: -0.5em;
+}
+
 .hidden {
   display: none;
 }
