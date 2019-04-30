@@ -1,5 +1,7 @@
 package org.leialearns.rest;
 
+import org.leialearns.axon.lag.LagService;
+import org.leialearns.axon.lag.Throttle;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,14 +16,19 @@ public class InteractionService implements InteractionApiDelegate {
 
     private final StateTrackerService stateTrackerService;
     private final ModelStructureService modelStructureService;
+    private final LagService lagService;
 
-    public InteractionService(StateTrackerService stateTrackerService, ModelStructureService modelStructureService) {
+    public InteractionService(
+        StateTrackerService stateTrackerService, ModelStructureService modelStructureService, LagService lagService
+    ) {
         this.stateTrackerService = stateTrackerService;
         this.modelStructureService = modelStructureService;
+        this.lagService = lagService;
     }
 
     @Override
     public ResponseEntity<Void> uploadInteraction(MultipartFile data) {
+        Throttle throttle = lagService.createThrottle();
         int sleepMillis = 0;
         String currentStateId = null;
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(data.getInputStream()))) {
@@ -52,6 +59,7 @@ public class InteractionService implements InteractionApiDelegate {
                 if (sleepMillis > 0) {
                     Thread.sleep(sleepMillis);
                 }
+                throttle.check();
             }
         } catch (Exception exception) {
             log.warn("Exception while uploading interaction", exception);
