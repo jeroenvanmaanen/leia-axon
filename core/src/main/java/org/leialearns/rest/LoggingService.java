@@ -45,6 +45,7 @@ public class LoggingService implements LoggingApiDelegate {
     public ResponseEntity<Void> setLoggingLevel(String logger, String levelName) {
         Object loggerFrontEnd = LoggerFactory.getLogger(logger);
         if (loggerFrontEnd instanceof Logger) {
+            log.info("Specified level: [{}]", levelName);
             Level level = Level.toLevel(levelName, Level.INFO);
             Logger loggerBackEnd = (Logger) loggerFrontEnd;
             loggerBackEnd.setLevel(level);

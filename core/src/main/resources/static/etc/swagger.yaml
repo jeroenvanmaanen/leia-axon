@@ -277,6 +277,8 @@ paths:
       - Logging
       description: Set the logging-level of a logger
       operationId: setLoggingLevel
+      consumes:
+      - multipart/form-data
       parameters:
       - in: path
         name: logger
