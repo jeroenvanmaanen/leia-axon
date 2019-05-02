@@ -10,7 +10,11 @@ PROJECT="$(dirname "${BIN}")"
 declare -a FLAGS_INHERIT
 source "${BIN}/verbose.sh"
 
+test -x "${BIN}/create-local-settings.sh" && "${BIN}/create-local-settings.sh"
+
 : ${STACK:=STACK}
+: ${AXON_SERVER_PORT=8024}
+: ${API_SERVER_PORT=8080}
 source "${BIN}/settings-local.sh"
 
 if [[ ".$1" = '.--help' ]]
@@ -32,8 +36,6 @@ then
   DO_BUILD='false'
   shift
 fi
-
-"${BIN}/swagger-yaml-to-json.sh"
 
 function waitForServerReady() {
     local URL="$1"
@@ -71,10 +73,6 @@ function waitForDockerComposeReady() {
     )
 }
 
-: ${AXON_SERVER_PORT=8024}
-: ${API_SERVER_PORT=8080}
-"${BIN}/create-local-settings.sh"
-
 source "${PROJECT}/${STACK}/etc/settings-local.sh"
 
 sleep 5 # Wait for Axon Server to start
@@ -84,6 +82,8 @@ sleep 5 # Wait for Axon Server to start
 
     if "${DO_BUILD}"
     then
+        "${BIN}/swagger-yaml-to-json.sh"
+
         docker rm -f "${STACK}-axon-server" || true
         docker rm -f "${STACK}-mongodb" || true
         "${BIN}/docker-run-axon-server.sh"
