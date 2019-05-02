@@ -26,11 +26,12 @@ public class TriggerCommandOnceService {
             .build();
     }
 
-    public <T extends WithAllocatedTokens<T>> Function<T,T> allocate(CascadingCommandTracker tracker, String... targetIds) {
-        return event -> allocate(tracker, event, targetIds);
+    @SuppressWarnings("unused")
+    public <T extends WithAllocatedTokens<T>> Function<T,T> allocate(CascadingCommandTracker tracker, CascadingCommand<?> command, String... targetIds) {
+        return event -> allocate(tracker, command, event, targetIds);
     }
 
-    public <T extends WithAllocatedTokens<T>> T allocate(CascadingCommandTracker tracker, T event, String... targetIds) {
+    public <T extends WithAllocatedTokens<T>> T allocate(CascadingCommandTracker tracker, CascadingCommand<?> command, T event, String... targetIds) {
         if (targetIds == null || targetIds.length < 1) {
             return event;
         }
@@ -39,7 +40,7 @@ public class TriggerCommandOnceService {
             long token = allocate(tracker.getCommandCounter(), targetId);
             tokens.put(targetId, token);
         }
-        return event.withAllocatedTokens(tokens);
+        return event.withAllocatedTokens(tokens).withOriginTimestamp(command.getOriginTimestamp());
     }
 
     public long allocate(CommandCounter commandCounter, String targetId) {
@@ -54,6 +55,7 @@ public class TriggerCommandOnceService {
             .build();
     }
 
+    @SuppressWarnings("unused")
     public void handleTokenAllocations(CascadingCommandTracker tracker, WithAllocatedTokens<?> event) {
         CommandCounter commandCounter = tracker.getCommandCounter();
         Map<String,Long> tokens = Optional.ofNullable(event).map(WithAllocatedTokens::getAllocatedTokens).orElse(Collections.emptyMap());
@@ -91,9 +93,11 @@ public class TriggerCommandOnceService {
         }
         return command
             .withSourceAggregateIdentifier(sourceId)
-            .withAllocatedToken(token);
+            .withAllocatedToken(token)
+            .withOriginTimestamp(event.getOriginTimestamp());
     }
 
+    @SuppressWarnings("unused")
     public boolean isFulfilled(CascadingCommandTracker tracker, CascadingCommand<?> command) {
         return !checkIfUnfulfilled(tracker, command);
     }
@@ -127,6 +131,7 @@ public class TriggerCommandOnceService {
         return true;
     }
 
+    @SuppressWarnings("unused")
     public <T extends CascadingCommand<T>> void doIfUnfulfilled(T command, CascadingCommandTracker tracker, Consumer<T> action) {
         if (checkIfUnfulfilled(tracker, command)) {
             log.trace("Execute command once: {} -({})-> {}: {}", command.getSourceAggregateIdentifier(), command.getAllocatedToken(), command.getId(), command.getClass().getSimpleName());
@@ -142,10 +147,12 @@ public class TriggerCommandOnceService {
             .id(command.getId())
             .sourceId(command.getSourceAggregateIdentifier())
             .token(command.getAllocatedToken())
+            .originTimestamp(command.getOriginTimestamp())
             .build();
         aggregateLifecycle.apply(event);
     }
 
+    @SuppressWarnings("unused")
     public void registerFulfilled(CascadingCommandTracker tracker, TokenFulfilledEvent event) {
         CommandCounter commandCounter = tracker.getCommandCounter();
         if (commandCounter == null) {

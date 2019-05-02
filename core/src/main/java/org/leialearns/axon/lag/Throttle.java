@@ -23,10 +23,12 @@ public class Throttle {
             return;
         }
         count = block;
-        while (lagService.getLag() >= threshold) {
+        double lag;
+        while ((lag = lagService.getLag()) >= threshold) {
             try {
-                log.debug("Sleep");
-                Thread.sleep(2000);
+                long millis = (long) Math.ceil(lag * 500);
+                log.debug("Sleep: {}", millis);
+                Thread.sleep(millis);
             } catch (InterruptedException e) {
                 log.trace("Interrupted", e);
             }

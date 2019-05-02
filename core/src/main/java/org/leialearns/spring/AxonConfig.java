@@ -9,6 +9,9 @@ import com.mongodb.MongoClient;
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.commandhandling.CommandBus;
 import org.axonframework.commandhandling.gateway.CommandGatewayFactory;
+import org.axonframework.common.transaction.TransactionManager;
+import org.axonframework.config.EventProcessingConfigurer;
+import org.axonframework.eventhandling.*;
 import org.axonframework.eventhandling.tokenstore.TokenStore;
 import org.axonframework.extensions.mongo.DefaultMongoTemplate;
 import org.axonframework.extensions.mongo.MongoTemplate;
@@ -17,7 +20,9 @@ import org.axonframework.serialization.Serializer;
 import org.axonframework.serialization.json.JacksonSerializer;
 import org.axonframework.spring.config.annotation.AnnotationCommandHandlerBeanPostProcessor;
 import org.leialearns.axon.StackCommandGateway;
+import org.leialearns.axon.model.node.process.ModelNodeEventHandler;
 import org.leialearns.axon.once.TriggerCommandOnceService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -101,5 +106,24 @@ public class AxonConfig {
     @Bean
     public TriggerCommandOnceService onceService(AggregateLifecycleBean aggregateLifecycle) {
         return new TriggerCommandOnceService(aggregateLifecycle);
+    }
+
+    @Autowired
+    public void configure(EventProcessingConfigurer configurer, TokenStore tokenStore, TransactionManager transactionManager) {
+        TrackingEventProcessorConfiguration configuration = TrackingEventProcessorConfiguration.forParallelProcessing(4).andBatchSize(1000);
+        configurer.registerEventProcessor(ModelNodeEventHandler.PROCESSOR_NAME,
+            (n, c, i) -> {
+                TrackingEventProcessor result = TrackingEventProcessor.builder()
+                    .name("leia/" + n)
+                    .eventHandlerInvoker(i)
+                    .messageSource(c.eventStore())
+                    .tokenStore(tokenStore)
+                    .trackingEventProcessorConfiguration(configuration)
+                    .transactionManager(transactionManager)
+                    .build();
+                log.debug("Tracking event processor: {}: {}", n, result);
+                return result;
+            }
+        );
     }
 }

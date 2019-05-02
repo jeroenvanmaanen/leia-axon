@@ -13,5 +13,5 @@ public class CreateModelNodeCommandUnsafe implements StackCommand {
     @TargetAggregateIdentifier
     private String id;
 
-    ModelNodeData data;
+    private ModelNodeData data;
 }

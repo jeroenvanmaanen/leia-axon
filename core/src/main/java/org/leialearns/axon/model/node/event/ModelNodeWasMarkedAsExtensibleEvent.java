@@ -9,6 +9,5 @@ import org.leialearns.axon.StackEvent;
 @Builder
 @JsonDeserialize(builder = ModelNodeWasMarkedAsExtensibleEvent.ModelNodeWasMarkedAsExtensibleEventBuilder.class)
 public class ModelNodeWasMarkedAsExtensibleEvent implements StackEvent {
-
     private String id;
 }

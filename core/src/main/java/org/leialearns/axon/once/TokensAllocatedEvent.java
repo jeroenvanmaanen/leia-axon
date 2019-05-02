@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Value;
 import lombok.experimental.Wither;
 
+import java.time.Instant;
 import java.util.Map;
 
 @Value
@@ -14,4 +15,5 @@ import java.util.Map;
 public class TokensAllocatedEvent implements WithAllocatedTokens<TokensAllocatedEvent> {
     private String id;
     private Map<String,Long> allocatedTokens;
+    private Instant originTimestamp;
 }

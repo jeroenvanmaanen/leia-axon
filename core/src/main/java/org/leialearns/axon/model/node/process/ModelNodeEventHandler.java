@@ -2,7 +2,10 @@ package org.leialearns.axon.model.node.process;
 
 import lombok.extern.slf4j.Slf4j;
 import org.axonframework.eventhandling.EventHandler;
+import org.axonframework.eventhandling.Timestamp;
 import org.bson.types.ObjectId;
+import org.leialearns.axon.lag.LagService;
+import org.leialearns.axon.model.node.event.ModelNodeChildAddedEvent;
 import org.leialearns.axon.model.node.event.ModelNodeCreatedEvent;
 import org.leialearns.axon.model.node.event.ModelNodeWasMarkedAsExtensibleEvent;
 import org.leialearns.axon.model.node.event.ModelStepEvent;
@@ -16,18 +19,26 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
 
+import java.lang.invoke.MethodHandles;
+import java.time.Instant;
+import java.util.Optional;
+
 @Component
 @Slf4j
 public class ModelNodeEventHandler {
+    public final static String PROCESSOR_NAME = MethodHandles.lookup().lookupClass().getPackage().getName();
 
+    private final LagService lagService;
     private final MongoTemplate mongoTemplate;
 
-    public ModelNodeEventHandler(MongoTemplate mongoTemplate) {
+    public ModelNodeEventHandler(LagService lagService, MongoTemplate mongoTemplate) {
+        this.lagService = lagService;
         this.mongoTemplate = mongoTemplate;
     }
 
     @EventHandler
-    public void on(ModelNodeCreatedEvent event) {
+    public void on(ModelNodeCreatedEvent event, @Timestamp Instant timestamp) {
+        log.debug("On model node created: {}: {}", event.getData().getId(), event.getData().getKey());
         String id = event.getId();
         ModelNodeData data = event.getData();
         ModelNodeDocument.builder().id(id).build();
@@ -37,10 +48,12 @@ public class ModelNodeEventHandler {
             .set("data", data)
             .set("_class", ModelNodeDocument.class.getCanonicalName());
         mongoTemplate.upsert(query, update, ModelNodeDocument.class);
+        lagService.recordLag(event, timestamp);
     }
 
     @EventHandler
-    public void on(ModelNodeWasMarkedAsExtensibleEvent event) {
+    public void on(ModelNodeWasMarkedAsExtensibleEvent event, @Timestamp Instant timestamp) {
+        log.debug("On model node was marked as extensible: {}", event.getId());
         String id = event.getId();
         Query query = Query.query(Criteria.where("_id").is(new ObjectId(id)));
         Update update = Update
@@ -48,10 +61,12 @@ public class ModelNodeEventHandler {
             .set("data.extensible", true)
             .set("_class", ModelNodeDocument.class.getCanonicalName());
         mongoTemplate.upsert(query, update, ModelNodeDocument.class);
+        lagService.recordLag(event, timestamp);
     }
 
     @EventHandler
-    public void on(ModelStepEvent event) {
+    public void on(ModelStepEvent event, @Timestamp Instant timestamp) {
+        log.debug("On model step: {} -({})-> {}", event.getPreviousModelNodeId(), show(event.getSymbol()), event.getId());
         String sourceId = event.getPreviousModelNodeId();
         SymbolReference first = event.getSymbol();
         Criteria criteria = Criteria
@@ -65,5 +80,16 @@ public class ModelNodeEventHandler {
             .set("targetId", event.getId())
             .set("_class", TransitionDocument.class.getCanonicalName());
         mongoTemplate.upsert(query, update, TransitionDocument.class);
+        lagService.recordLag(event, timestamp);
+    }
+
+    @EventHandler
+    public void on(ModelNodeChildAddedEvent event, @Timestamp Instant timestamp) {
+        log.debug("On model node child added: {} <-({})- {}", event.getId(), show(event.getSymbol()), event.getChildId());
+        lagService.recordLag(event, timestamp);
+    }
+
+    private String show(SymbolReference symbol) {
+        return Optional.ofNullable(symbol).map(s -> s.getVocabulary() + ":" + s.getOrdinal()).orElse("?:?");
     }
 }
