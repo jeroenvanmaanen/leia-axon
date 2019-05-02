@@ -290,6 +290,22 @@ paths:
       responses:
         200:
           description: Successful operation
+  /api/admin/logger/all:
+    post:
+      tags:
+      - Logging
+      description: Upload logging levels
+      operationId: uploadLoggingLevels
+      consumes:
+      - multipart/form-data
+      parameters:
+      - in: formData
+        name: data
+        description: The logging configuration to upload
+        type: file
+      responses:
+        200:
+          description: Successful operation
 definitions:
   ModelNodeData:
     type: object
