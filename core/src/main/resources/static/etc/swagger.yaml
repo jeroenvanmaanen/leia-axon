@@ -255,6 +255,41 @@ paths:
           description: Successful operation
           schema:
             $ref: "#/definitions/ArrayOfUniqueBucket"
+  /api/admin/logger/{logger}/level:
+    get:
+      tags:
+      - Logging
+      description: Get the logging-level of a logger
+      operationId: getLoggingLevel
+      parameters:
+      - in: path
+        name: logger
+        description: The name of the logger
+        required: true
+        type: string
+      responses:
+        200:
+          description: Logging level
+          schema:
+            $ref: "#/definitions/LoggingLevel"
+    post:
+      tags:
+      - Logging
+      description: Set the logging-level of a logger
+      operationId: setLoggingLevel
+      parameters:
+      - in: path
+        name: logger
+        description: The name of the logger
+        required: true
+        type: string
+      - in: formData
+        name: level
+        description: The name of the logging level
+        type: string
+      responses:
+        200:
+          description: Successful operation
 definitions:
   ModelNodeData:
     type: object
@@ -322,6 +357,13 @@ definitions:
     type: array
     items:
       type: string
+  LoggingLevel:
+    type: object
+    properties:
+      levelInt:
+        type: integer
+      levelStr:
+        type: string
 securityDefinitions:
   STACK_auth:
     type: oauth2
