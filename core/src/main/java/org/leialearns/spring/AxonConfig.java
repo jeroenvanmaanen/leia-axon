@@ -109,21 +109,47 @@ public class AxonConfig {
     }
 
     @Autowired
-    public void configure(EventProcessingConfigurer configurer, TokenStore tokenStore, TransactionManager transactionManager) {
-        TrackingEventProcessorConfiguration configuration = TrackingEventProcessorConfiguration.forParallelProcessing(4).andBatchSize(1000);
-        configurer.registerEventProcessor(ModelNodeEventHandler.PROCESSOR_NAME,
-            (n, c, i) -> {
-                TrackingEventProcessor result = TrackingEventProcessor.builder()
-                    .name("leia/" + n)
-                    .eventHandlerInvoker(i)
-                    .messageSource(c.eventStore())
-                    .tokenStore(tokenStore)
-                    .trackingEventProcessorConfiguration(configuration)
-                    .transactionManager(transactionManager)
-                    .build();
-                log.debug("Tracking event processor: {}: {}", n, result);
-                return result;
-            }
-        );
+    public void configure(EventProcessingConfigurer configurator, TokenStore tokenStore, TransactionManager transactionManager) {
+        TrackingEventProcessorConfiguration trackerConfiguration =
+            TrackingEventProcessorConfiguration.forParallelProcessing(4).andBatchSize(1000);
+        EventProcessingConfigurer.EventProcessorBuilder eventProcessorBuilder =
+            createEventProcessorBuilder(trackerConfiguration, tokenStore, transactionManager);
+        configurator.registerEventProcessor(ModelNodeEventHandler.PROCESSOR_NAME, eventProcessorBuilder);
+    }
+
+    protected EventProcessingConfigurer.EventProcessorBuilder createEventProcessorBuilder(
+        TrackingEventProcessorConfiguration trackerConfiguration, TokenStore tokenStore,
+        TransactionManager transactionManager
+    ) {
+        return new StackEventProcessorBuilder(trackerConfiguration, tokenStore, transactionManager);
+    }
+
+    protected static class StackEventProcessorBuilder implements EventProcessingConfigurer.EventProcessorBuilder {
+        private final TrackingEventProcessorConfiguration trackerConfiguration;
+        private final TokenStore tokenStore;
+        private final TransactionManager transactionManager;
+
+        protected StackEventProcessorBuilder(
+            TrackingEventProcessorConfiguration trackerConfiguration, TokenStore tokenStore,
+            TransactionManager transactionManager
+        ) {
+            this.trackerConfiguration = trackerConfiguration;
+            this.tokenStore = tokenStore;
+            this.transactionManager = transactionManager;
+        }
+
+        @Override
+        public EventProcessor build(String name, org.axonframework.config.Configuration configuration, EventHandlerInvoker invoker) {
+            TrackingEventProcessor result = TrackingEventProcessor.builder()
+                .name("STACK/" + name)
+                .eventHandlerInvoker(invoker)
+                .messageSource(configuration.eventStore())
+                .tokenStore(tokenStore)
+                .trackingEventProcessorConfiguration(trackerConfiguration)
+                .transactionManager(transactionManager)
+                .build();
+            log.debug("Tracking event processor: {}: {}", name, result);
+            return result;
+        }
     }
 }
