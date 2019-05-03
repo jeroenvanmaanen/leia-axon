@@ -1,0 +1,19 @@
+{
+  "ImageId": "ami-ca0135b3",
+  "InstanceType": "m5.xlarge",
+  "KeyName": "jeroen-aenea",
+  "BlockDeviceMappings": [
+    {
+      "DeviceName": "/dev/sda1",
+      "Ebs": {
+        "DeleteOnTermination": true,
+        "VolumeType": "gp2",
+        "VolumeSize": 100
+      }
+    }
+  ],
+  "SecurityGroupIds": [ "sg-0aa58d3172bb17bd9" ],
+  "Placement": {
+    "AvailabilityZone": "eu-west-1b"
+  }
+}

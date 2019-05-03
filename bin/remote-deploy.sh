@@ -17,7 +17,7 @@ source "${BIN}/verbose.sh"
 : ${STACK:=STACK}
 source "${BIN}/settings-local.sh"
 
-ssh "${DEPLOY_USER}@${DEPLOY_HOST}" bash -c ": ; cd '/opt/${PROJECT_NAME}/${STACK}' ; sudo docker-compose rm -f --stop ; sudo docker-compose pull"
+ssh "${DEPLOY_USER}@${DEPLOY_HOST}" bash -c ": ; cd '/opt/${PROJECT_NAME}/${STACK}' ; sudo docker-compose rm -f --stop ; sudo docker-compose pull" || true
 
 declare -a DEPLOY_FLAGS
 if [[ ".$1" = '.--clean' ]]
