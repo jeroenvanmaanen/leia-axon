@@ -83,6 +83,11 @@ public class LagService {
     }
 
     public Throttle createThrottle() {
-        return new Throttle(this, THROTTLE_BLOCK, THROTTLE_THRESHOLD);
+        return new Throttle(this, THROTTLE_BLOCK, THROTTLE_THRESHOLD) {
+            @Override
+            public void check() {
+                getLag();
+            }
+        };
     }
 }
