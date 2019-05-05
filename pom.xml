@@ -24,6 +24,7 @@
 
     <modules>
         <module>core</module>
+        <module>core-sidecar</module>
         <module>present</module>
         <module>proxy</module>
     </modules>
