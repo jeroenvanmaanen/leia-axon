@@ -58,6 +58,8 @@ services:
     ports:
     - target: 80
       published: ${UI_SERVER_PORT}
+    expose:
+    - "27017"
     depends_on:
     - ${STACK}-core
     - ${STACK}-present
