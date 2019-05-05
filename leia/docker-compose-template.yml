@@ -60,6 +60,7 @@ services:
       published: ${UI_SERVER_PORT}
     expose:
     - "27017"
+    - "8124"
     depends_on:
     - ${STACK}-core
     - ${STACK}-present
