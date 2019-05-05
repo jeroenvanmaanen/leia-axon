@@ -1,4 +1,4 @@
-FROM nginx:1.15-alpine
+FROM envoyproxy/envoy-alpine:v1.10.0
 MAINTAINER Jeroen van Maanen <jeroen@leialearns.org>
 
-ADD etc /etc/nginx
+COPY etc/envoy.yaml /etc/envoy/envoy.yaml
