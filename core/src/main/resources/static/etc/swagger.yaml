@@ -73,7 +73,7 @@ paths:
       - multipart/form-data
       parameters:
       - in: formData
-        name: data
+        name: file
         description: The data to upload
         type: file
       responses:
@@ -229,7 +229,7 @@ paths:
       - multipart/form-data
       parameters:
       - in: formData
-        name: data
+        name: file
         description: The data to upload
         type: file
       responses:
@@ -302,7 +302,7 @@ paths:
       - multipart/form-data
       parameters:
       - in: formData
-        name: data
+        name: file
         description: The logging configuration to upload
         type: file
       responses:
