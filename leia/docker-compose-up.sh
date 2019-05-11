@@ -17,11 +17,9 @@ PRESENT="${PROJECT}/present"
 source "${PROJECT}/bin/verbose.sh"
 
 : ${STACK:=STACK}
-source "${PROJECT}/bin/settings-local.sh"
-
 : ${MONGO_SERVER_PORT:=27017}
 : ${EXTRA_VOLUMES:=}
-source "${COMPOSE}/etc/settings-local.sh"
+source "${PROJECT}/bin/settings-local.sh"
 
 DOCKER_REPOSITORY="${DOCKER_REPOSITORY:=}"
 if [[ -z "${DOCKER_REPOSITORY}" ]]
