@@ -7,6 +7,32 @@ admin:
       port_value: 9901
 static_resources:
   listeners:
+    - name: listener_leia_core
+      address:
+        socket_address:
+          protocol: TCP
+          address: 0.0.0.0
+          port_value: 8080
+      filter_chains:
+        - filters:
+            - name: envoy.http_connection_manager
+              typed_config:
+                "@type": type.googleapis.com/envoy.config.filter.network.http_connection_manager.v2.HttpConnectionManager
+                stat_prefix: ingress_leia_core_http
+                stream_idle_timeout: 0s
+                route_config:
+                  name: local_leia_core_route
+                  virtual_hosts:
+                    - name: local_leia_core_service
+                      domains: ["*"]
+                      routes:
+                        - match:
+                            prefix: "/"
+                          route:
+                            host_rewrite: leia-core
+                            cluster: service_core
+                http_filters:
+                  - name: envoy.router
     - name: listener_axon
       address:
         socket_address:
@@ -47,20 +73,6 @@ static_resources:
                 stat_prefix: ingress_tcp_mondodb
                 cluster: service_mongodb
   clusters:
-    - name: service_present
-      connect_timeout: 0.25s
-      type: LOGICAL_DNS
-      dns_lookup_family: V4_ONLY
-      lb_policy: ROUND_ROBIN
-      load_assignment:
-        cluster_name: service_present
-        endpoints:
-          - lb_endpoints:
-              - endpoint:
-                  address:
-                    socket_address:
-                      address: leia-present
-                      port_value: 3000
     - name: service_core
       connect_timeout: 0.25s
       type: LOGICAL_DNS

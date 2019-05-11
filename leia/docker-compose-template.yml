@@ -40,10 +40,11 @@ services:
     - "127.0.0.1:${API_SERVER_PORT}:8080"
   ${STACK}-core-sidecar:
     image: ${DOCKER_REPOSITORY}/${STACK}-core-sidecar:${STACK_IMAGE_VERSION}
-    hostname: ${STACK}-core
+    hostname: ${STACK}-core-sidecar
     networks:
     - ${STACK}
     expose:
+    - "8080"
     - "8124"
     - "27017"
     depends_on:
