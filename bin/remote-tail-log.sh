@@ -15,6 +15,6 @@ source "${BIN}/verbose.sh"
 : ${DEPLOY_HOST:=localhost}
 : ${DEPLOY_USER:=guest}
 : ${STACK:=STACK}
-source "${BIN}/settings-local.sh"
+source "${PROJECT}/etc/settings-local.sh"
 
 ssh "${DEPLOY_USER}@${DEPLOY_HOST}" bash -c ": ; set -x ; tail -n +0 -f '/opt/${PROJECT_NAME}/tmp/${STACK}.log'"

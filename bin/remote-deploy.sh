@@ -15,7 +15,7 @@ source "${BIN}/verbose.sh"
 : ${DEPLOY_HOST:=localhost}
 : ${DEPLOY_USER:=guest}
 : ${STACK:=STACK}
-source "${BIN}/settings-local.sh"
+source "${PROJECT}/etc/settings-local.sh"
 
 ssh "${DEPLOY_USER}@${DEPLOY_HOST}" bash -c ": ; cd '/opt/${PROJECT_NAME}/${STACK}' ; sudo docker-compose rm -f --stop ; sudo docker-compose pull" || true
 

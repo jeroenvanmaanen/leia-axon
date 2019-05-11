@@ -8,7 +8,7 @@ PROJECT="$(dirname "${BIN}")"
 source "${BIN}/verbose.sh"
 
 : ${STACK:=STACK}
-source "${BIN}/settings-local.sh"
+source "${PROJECT}/etc/settings-local.sh"
 
 MODULE="$1" ; shift || true
 

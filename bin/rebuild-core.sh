@@ -6,7 +6,7 @@ BIN="$(cd "$(dirname "$0")" ; pwd)"
 PROJECT="$(dirname "${BIN}")"
 
 : ${STACK:=STACK}
-source "${BIN}/settings-local.sh"
+source "${PROJECT}/etc/settings-local.sh"
 
 (
     cd "${PROJECT}/core"

@@ -19,7 +19,7 @@ source "${PROJECT}/bin/verbose.sh"
 : ${STACK:=STACK}
 : ${MONGO_SERVER_PORT:=27017}
 : ${EXTRA_VOLUMES:=}
-source "${PROJECT}/bin/settings-local.sh"
+source "${PROJECT}/etc/settings-local.sh"
 
 DOCKER_REPOSITORY="${DOCKER_REPOSITORY:=}"
 if [[ -z "${DOCKER_REPOSITORY}" ]]

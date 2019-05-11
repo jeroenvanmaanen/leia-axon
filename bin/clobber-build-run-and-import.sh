@@ -15,7 +15,7 @@ test -x "${BIN}/create-local-settings.sh" && "${BIN}/create-local-settings.sh"
 : ${STACK:=STACK}
 : ${AXON_SERVER_PORT=8024}
 : ${API_SERVER_PORT=8080}
-source "${BIN}/settings-local.sh"
+source "${PROJECT}/etc/settings-local.sh"
 
 if [[ ".$1" = '.--help' ]]
 then
@@ -73,8 +73,6 @@ function waitForDockerComposeReady() {
     )
 }
 
-source "${PROJECT}/${STACK}/etc/settings-local.sh"
-
 sleep 5 # Wait for Axon Server to start
 
 (
@@ -117,7 +115,7 @@ sleep 5 # Wait for Axon Server to start
     waitForServerReady "${STACK_API_URL}/actuator/health"
     sleep 5
 
-    cd "${PROJECT}/${STACK}/etc"
+    cd "${PROJECT}/etc"
     echo 'Importing logging levels' >&2
     curl -sS -X POST "${STACK_API_URL}/api/admin/logger/all" -H "accept: application/json" -H "Content-Type: multipart/form-data" -F "file=@logging-levels-local.yaml"
     cd "${PROJECT}/data"
