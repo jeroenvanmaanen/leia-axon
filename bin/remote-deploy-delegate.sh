@@ -1,11 +1,9 @@
 #!/usr/bin/env bash
 
-set -e
-
 BIN="$(cd "$(dirname "$0")" ; pwd)"
 PROJECT="$(dirname "${BIN}")"
 
-source "${BIN}/verbose.sh"
+source "${BIN}/lib-init.sh"
 
 : ${STACK:=STACK}
 source "${PROJECT}/etc/settings-local.sh"

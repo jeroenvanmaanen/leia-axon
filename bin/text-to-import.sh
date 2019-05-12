@@ -2,7 +2,7 @@
 
 BIN="$(cd "$(dirname "$0")" ; pwd)"
 
-source "${BIN}/verbose.sh"
+source "${BIN}/lib-init.sh"
 
 F=20
 if [[ ".$1" = '.--frequency' ]]

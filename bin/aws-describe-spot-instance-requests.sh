@@ -1,3 +1,8 @@
 #!/usr/bin/env bash
 
-aws.sh ec2 describe-spot-instance-requests --query 'SpotInstanceRequests[*].{ID:InstanceId}'
+BIN="$(cd "$(dirname "$0")" ; pwd)"
+
+declare -a FLAGS_INHERIT
+source "${BIN}/lib-init.sh"
+
+"${BIN}/aws.sh" "${FLAGS_INHERIT[@]}" ec2 describe-spot-instance-requests --query 'SpotInstanceRequests[*].{ID:InstanceId}'

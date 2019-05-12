@@ -5,10 +5,10 @@ set -e
 BIN="$(cd "$(dirname "$0")" ; pwd)"
 PROJECT="$(dirname "${BIN}")"
 
+source "${BIN}/lib-init.sh"
+
 : ${STACK:=STACK}
 source "${PROJECT}/etc/settings-local.sh"
-
-"${BIN}/swagger-yaml-to-json.sh"
 
 (
     cd "${PROJECT}"

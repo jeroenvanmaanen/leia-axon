@@ -1,14 +1,12 @@
 #!/usr/bin/env bash
 
-set -e
-
 BIN="$(cd "$(dirname "$0")" ; pwd)"
 PROJECT="$(dirname "${BIN}")"
 
 PROJECT_NAME="$(cd "${PROJECT}" ; git remote get-url origin | sed -e 's:.*/::' -e 's/[.]git$//')"
 
 declare -a FLAGS_INHERIT
-source "${BIN}/verbose.sh"
+source "${BIN}/lib-init.sh"
 
 "${BIN}/create-local-settings.sh"
 

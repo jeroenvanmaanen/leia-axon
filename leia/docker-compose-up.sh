@@ -2,19 +2,14 @@
 
 set -e
 
-SED_EXT=-r
-case $(uname) in
-Darwin*)
-        SED_EXT=-E
-esac
-export SED_EXT
-
 COMPOSE="$(cd "$(dirname "$0")" ; pwd)"
 PROJECT="$(dirname "${COMPOSE}")"
+BIN="${PROJECT}/bin"
 PRESENT="${PROJECT}/present"
 
 : ${SILENT:=true}
-source "${PROJECT}/bin/verbose.sh"
+: ${SED_EXT:=-r}
+source "${BIN}/lib-init.sh"
 
 : ${STACK:=STACK}
 : ${MONGO_SERVER_PORT:=27017}

@@ -1,6 +1,8 @@
 #!/usr/bin/false
 
 STACK=leia
+
+AWS_REGION='eu-west-1'
 DEPLOY_HOST=localhost
 DEPLOY_USER="${USER=guest}"
 

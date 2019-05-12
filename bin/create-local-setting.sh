@@ -1,22 +1,15 @@
 #!/bin/bash
 
-set -e
-
 BIN="$(cd "$(dirname "$0")" ; pwd)"
 
-. "${BIN}/verbose.sh"
-
-SED_EXT=-r
-case "$(uname)" in
-Darwin*)
-        SED_EXT=-E
-esac
-export SED_EXT
+: ${SED_EXT:=-r}
+NEEDS_SETUP='false'
+source "${BIN}/lib-init.sh"
 
 SAMPLE="$1"
 LOCAL="$(echo "${SAMPLE}" | sed "${SED_EXT}" -e 's/-sample([+][^.]*)?/-local/')"
 
-if [ -e "${LOCAL}" ]
+if [[ -e "${LOCAL}" ]]
 then
     log "Skip: ${LOCAL}"
 else

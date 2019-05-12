@@ -16,7 +16,7 @@ then
 else
     SUFFIX="$(date '+%Y%m%dT%H%M')"
 fi
-log "SUFFIX=[${SUFFIX}]"
+info "SUFFIX=[${SUFFIX}]"
 
 docker run --rm -ti \
     -v "${STACK}_axon-data:/opt/axonframework/data" \

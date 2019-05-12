@@ -15,7 +15,7 @@ QUALIFIER="$1"
 SUFFIX=''
 if test -n "${QUALIFIER}"
 then
-	SUFFIX="+${QUALIFIER}"
+    SUFFIX="+${QUALIFIER}"
 fi
 
 aws.sh ec2 request-spot-instances --spot-price "${SPOT_PRICE}" --launch-specification "$(cat "${PROJECT}/aws/launch-specification${SUFFIX}-local.json")"

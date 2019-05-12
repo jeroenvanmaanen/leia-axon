@@ -6,8 +6,10 @@ BIN="$(cd "$(dirname "$0")" ; pwd)"
 PROJECT="$(dirname "${BIN}")"
 
 declare -a FLAGS_INHERIT
-. "${BIN}/verbose.sh"
+NEEDS_SETUP='false'
+source "${BIN}/lib-init.sh"
 
-info "PROJECT=[${PROJECT}]"
+log "PROJECT=[${PROJECT}]"
 
-find "${PROJECT}" -name '*-sample.*' -print0 | xargs -0 -n 1 "${BIN}/create-local-setting.sh" "${FLAGS_INHERIT[@]}" "$@"
+find "${PROJECT}" \( -type d \( -name target -o -name tmp -o -name node_modules -o -name '.*' \) -prune -type f \) -o -type f -name '*-sample.*' -print0 \
+    | xargs -0 -n 1 "${BIN}/create-local-setting.sh" "${FLAGS_INHERIT[@]}" "$@"

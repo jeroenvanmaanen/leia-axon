@@ -2,13 +2,11 @@
 
 ## ~/src/leia/bin/clobber-build-run-and-import.sh -v --tee ~/src/leia/tmp/leia.log --skip-build --dev
 
-set -e
-
 BIN="$(cd "$(dirname "$0")" ; pwd)"
 PROJECT="$(dirname "${BIN}")"
 
 declare -a FLAGS_INHERIT
-source "${BIN}/verbose.sh"
+source "${BIN}/lib-init.sh"
 
 test -x "${BIN}/create-local-settings.sh" && "${BIN}/create-local-settings.sh"
 
@@ -80,7 +78,7 @@ sleep 5 # Wait for Axon Server to start
 
     if "${DO_BUILD}"
     then
-        "${BIN}/swagger-yaml-to-json.sh"
+##        "${BIN}/swagger-yaml-to-json.sh"
 
         docker rm -f "${STACK}-axon-server" || true
         docker rm -f "${STACK}-mongodb" || true
