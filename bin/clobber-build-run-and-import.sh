@@ -97,13 +97,10 @@ sleep 5 # Wait for Axon Server to start
         docker stop "${STACK}-mongodb"
     fi
 
-    (
-        cd "${STACK}"
-        docker-compose rm --stop --force
-        docker volume rm -f "${STACK}_mongo-data"
-        docker volume rm -f "${STACK}_axon-data"
-    )
-    "${STACK}/docker-compose-up.sh" "${FLAGS_INHERIT[@]}" "$@" &
+    docker-compose --project-name "${STACK}" --file "${PROJECT}/compose/docker-compose-local.yml" rm --stop --force
+    docker volume rm -f "${STACK}_mongo-data"
+    docker volume rm -f "${STACK}_axon-data"
+    "${BIN}/docker-compose-up.sh" "${FLAGS_INHERIT[@]}" "$@" &
     PID_STACK="$!"
     trap "echo ; kill '${PID_STACK}' ; waitForDockerComposeReady" EXIT
 

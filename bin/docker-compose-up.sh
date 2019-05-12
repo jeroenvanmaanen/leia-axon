@@ -2,9 +2,8 @@
 
 set -e
 
-COMPOSE="$(cd "$(dirname "$0")" ; pwd)"
-PROJECT="$(dirname "${COMPOSE}")"
-BIN="${PROJECT}/bin"
+BIN="$(cd "$(dirname "$0")" ; pwd)"
+PROJECT="$(dirname "${BIN}")"
 PRESENT="${PROJECT}/present"
 
 : ${SILENT:=true}
@@ -48,9 +47,22 @@ then
     working_dir: ${PRESENT}"
 fi
 
-BASE="${COMPOSE}/docker-compose"
-TEMPLATE="${BASE}-template.yml"
-TARGET="${BASE}.yml"
+COMPOSE="${PROJECT}/compose"
+
+: ${QUALIFIER:=default}
+if [[ -n "$1" ]]
+then
+    QUALIFIER="$1"
+fi
+SUFFIX=''
+if [[ ".${QUALIFIER}" != '.default' ]]
+then
+    SUFFIX="-${QUALIFIER}"
+fi
+STACK_NAME="leia${SUFFIX}"
+TEMPLATE="${COMPOSE}/docker-compose${SUFFIX}-template.yml"
+TARGET="${COMPOSE}/docker-compose${SUFFIX}-local.yml"
+
 VARIABLES="$(tr '$\012' '\012$' < "${TEMPLATE}" | sed -e '/^[{][A-Za-z_][A-Za-z0-9_]*[}]/!d' -e 's/^[{]//' -e 's/[}].*//')"
 
 function re-protect() {
@@ -78,5 +90,5 @@ done
 
 (
     cd "${COMPOSE}"
-    docker-compose up
+    docker-compose --project-name "${STACK_NAME}" --file "${TARGET}" up
 )
