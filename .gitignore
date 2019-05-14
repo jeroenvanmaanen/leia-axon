@@ -1,4 +1,5 @@
 /.idea/
+*.iml
 /tmp/
 /**/*-local.*
 /**/target/
