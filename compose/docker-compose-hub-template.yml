@@ -1,0 +1,66 @@
+version: '3.3'
+
+networks:
+  ${STACK}:
+    driver: overlay
+
+services:
+  axon-server:
+    image: axoniq/axonserver:${AXON_VERSION}
+    networks:
+    - ${STACK}
+    ports:
+    - "127.0.0.1:${AXON_SERVER_PORT}:8024"
+    expose:
+    - "8024"
+    - "8124"
+    volumes:
+    -
+      type: volume
+      source: axon-data
+      target: /opt/axonserver/data
+  mongodb:
+    image: mongo:${MONGO_VERSION}
+    networks:
+    - ${STACK}
+#$<MONGO_PORTS>
+    expose:
+    - "27017"
+    volumes:
+    -
+      type: volume
+      source: mongo-data
+      target: /data/db
+  ${STACK}-present:
+    image: ${DOCKER_REPOSITORY}/${STACK}-present:${STACK_IMAGE_VERSION}${PRESENT_SUFFIX}
+    networks:
+    - ${STACK}
+    expose:
+    - "3000"
+    depends_on:
+    - mongodb
+    - axon-server
+#${PRESENT_VOLUMES}
+  ${STACK}-hub:
+    image: ${DOCKER_REPOSITORY}/${STACK}-proxy:${STACK_IMAGE_VERSION}
+    networks:
+    - ${STACK}
+    dns_search: ${DNS_SEARCH}
+    ports:
+    - target: 80
+      published: ${UI_SERVER_PORT}
+    - target: 8124
+      published: 8124
+    - target: 27017
+      published: 27017
+    expose:
+    - "8124"
+    - "27017"
+    depends_on:
+    - ${STACK}-present
+    - mongodb
+    - axon-server
+
+volumes:
+  mongo-data:
+  axon-data:

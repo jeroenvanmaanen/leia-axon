@@ -24,8 +24,10 @@ mkdir -p "${PROJECT}/tmp"
 
 find "${PROJECT}" -ls
 
-echo nohup "${PROJECT}/bin/clobber-build-run-and-import.sh" -v --tee "${PROJECT}/tmp/${STACK}.log" --skip-build
-nohup "${PROJECT}/bin/clobber-build-run-and-import.sh" -v --tee "${PROJECT}/tmp/${STACK}.log" --skip-build >/dev/null 2>&1 &
+## echo nohup "${PROJECT}/bin/clobber-build-run-and-import.sh" -v --tee "${PROJECT}/tmp/${STACK}.log" --skip-build
+## nohup "${PROJECT}/bin/clobber-build-run-and-import.sh" -v --tee "${PROJECT}/tmp/${STACK}.log" --skip-build >/dev/null 2>&1 &
+echo nohup "${PROJECT}/bin/docker-compose-up.sh" -v "$@" "> ${PROJECT}/tmp/${STACK}.log" '2>&1 &'
+nohup      "${PROJECT}/bin/docker-compose-up.sh" -v "$@" > "${PROJECT}/tmp/${STACK}.log"  2>&1 &
 
 sleep 2
 

@@ -23,5 +23,6 @@ phases:
     commands:
       - docker push "jeroenvm/leia-proxy:${IMAGE_VERSION}"
       - docker push "jeroenvm/leia-core:${IMAGE_VERSION}"
+      - docker push "jeroenvm/leia-core-sidecar:${IMAGE_VERSION}"
       - docker push "jeroenvm/leia-present:${IMAGE_VERSION}"
       - docker push "jeroenvm/leia-present:${IMAGE_VERSION}-dev"

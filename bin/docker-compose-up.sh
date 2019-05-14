@@ -58,6 +58,11 @@ SUFFIX=''
 if [[ ".${QUALIFIER}" != '.default' ]]
 then
     SUFFIX="-${QUALIFIER}"
+    EXTRA_SETTINGS="${PROJECT}/etc/settings${SUFFIX}-local.sh"
+    if [[ -f "${EXTRA_SETTINGS}" ]]
+    then
+        source "${EXTRA_SETTINGS}"
+    fi
 fi
 STACK_NAME="leia${SUFFIX}"
 TEMPLATE="${COMPOSE}/docker-compose${SUFFIX}-template.yml"
