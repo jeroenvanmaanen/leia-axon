@@ -15,6 +15,26 @@ source "${BIN}/lib-init.sh"
 : ${EXTRA_VOLUMES:=}
 source "${PROJECT}/etc/settings-local.sh"
 
+if [[ ".$1" = '.--help' ]]
+then
+    echo "Usage: $(basename "$0") [ -v [ -v ] ] [ --qualifier <qualifier> ] [ --dev ] [ <docker-compose-up-flag>... ] "
+    exit 0
+fi
+
+REMOVE='false'
+if [[ ".$1" = '.--rm' ]]
+then
+    REMOVE='true'
+    shift
+fi
+
+: ${QUALIFIER:=default}
+if [[ ".$1" = '.--qualifier' ]]
+then
+    QUALIFIER="$2"
+    shift 2
+fi
+
 DOCKER_REPOSITORY="${DOCKER_REPOSITORY:=}"
 if [[ -z "${DOCKER_REPOSITORY}" ]]
 then
@@ -26,6 +46,28 @@ if [[ -n "${EXTRA_VOLUMES}" ]]
 then
     VOLUMES="
     volumes:${EXTRA_VOLUMES}"
+fi
+
+SUFFIX=''
+if [[ ".${QUALIFIER}" != '.default' ]]
+then
+    SUFFIX="-${QUALIFIER}"
+    EXTRA_SETTINGS="${PROJECT}/etc/settings${SUFFIX}-local.sh"
+    if [[ -f "${EXTRA_SETTINGS}" ]]
+    then
+        source "${EXTRA_SETTINGS}"
+    fi
+fi
+STACK_NAME="leia${SUFFIX}"
+
+COMPOSE="${PROJECT}/compose"
+TEMPLATE="${COMPOSE}/docker-compose${SUFFIX}-template.yml"
+TARGET="${COMPOSE}/docker-compose${SUFFIX}-local.yml"
+
+if "${REMOVE}" && [[ -f "${TARGET}" ]]
+then
+    docker-compose --project-name "${STACK_NAME}" --file "${TARGET}" rm --force --stop || true
+    docker-compose --project-name "${STACK_NAME}" --file "${TARGET}" pull || true
 fi
 
 MONGO_PORTS=' Do not expose Mongo DB port'
@@ -46,27 +88,6 @@ then
       target: ${PRESENT}
     working_dir: ${PRESENT}"
 fi
-
-COMPOSE="${PROJECT}/compose"
-
-: ${QUALIFIER:=default}
-if [[ -n "$1" ]]
-then
-    QUALIFIER="$1"
-fi
-SUFFIX=''
-if [[ ".${QUALIFIER}" != '.default' ]]
-then
-    SUFFIX="-${QUALIFIER}"
-    EXTRA_SETTINGS="${PROJECT}/etc/settings${SUFFIX}-local.sh"
-    if [[ -f "${EXTRA_SETTINGS}" ]]
-    then
-        source "${EXTRA_SETTINGS}"
-    fi
-fi
-STACK_NAME="leia${SUFFIX}"
-TEMPLATE="${COMPOSE}/docker-compose${SUFFIX}-template.yml"
-TARGET="${COMPOSE}/docker-compose${SUFFIX}-local.yml"
 
 VARIABLES="$(tr '$\012' '\012$' < "${TEMPLATE}" | sed -e '/^[{][A-Za-z_][A-Za-z0-9_]*[}]/!d' -e 's/^[{]//' -e 's/[}].*//')"
 
@@ -95,5 +116,5 @@ done
 
 (
     cd "${COMPOSE}"
-    docker-compose --project-name "${STACK_NAME}" --file "${TARGET}" up
+    docker-compose --project-name "${STACK_NAME}" --file "${TARGET}" up "$@"
 )

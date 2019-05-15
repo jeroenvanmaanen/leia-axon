@@ -28,7 +28,7 @@ then
     then
         shift
         NEEDS_SETUP='false'
-        FLAGS_INHERIT[${FLAGS_INHERIT[@]}]='--skip-setup'
+        FLAGS_INHERIT[${#FLAGS_INHERIT[@]}]='--skip-setup'
     elif "${NEEDS_SETUP}"
     then
         "${BIN}/create-local-settings.sh" "${FLAGS_INHERIT[@]}"
